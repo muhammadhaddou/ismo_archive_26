@@ -4,22 +4,52 @@ namespace App\Http\Controllers;
 
 use App\Models\Validation;
 use App\Models\Trainee;
+use App\Models\Filiere;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ValidationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $validations = Validation::with('trainee.filiere', 'user')
+        $filieres = Filiere::all();
+        $groups   = Trainee::distinct()->pluck('group');
+        $years    = Trainee::distinct()->pluck('graduation_year')->sortDesc();
+
+        $validations = Validation::with('trainee.filiere', 'trainee.documents', 'user')
+
+            ->when($request->filiere_id, function ($q) use ($request) {
+                $q->whereHas('trainee', function ($q) use ($request) {
+                    $q->where('filiere_id', $request->filiere_id);
+                });
+            })
+
+            ->when($request->group, function ($q) use ($request) {
+                $q->whereHas('trainee', function ($q) use ($request) {
+                    $q->where('group', $request->group);
+                });
+            })
+
+            ->when($request->graduation_year, function ($q) use ($request) {
+                $q->whereHas('trainee', function ($q) use ($request) {
+                    $q->where('graduation_year', $request->graduation_year);
+                });
+            })
+
             ->latest('date_validation')
-            ->paginate(15);
-        return view('validations.index', compact('validations'));
+            ->paginate(15)
+            ->withQueryString();
+
+        return view('validations.index', compact(
+            'validations',
+            'filieres',
+            'groups',
+            'years'
+        ));
     }
 
     public function create(Trainee $trainee)
     {
-        // تحقق واش جميع الوثائق مسلمة
         $docs = $trainee->documents;
         $types = ['Bac', 'Diplome', 'Attestation', 'Bulletin'];
         $missing = [];
@@ -42,9 +72,8 @@ class ValidationController extends Controller
             'observations'    => 'nullable|string',
         ]);
 
-        // حفظ الصورة
         $path = $request->file('signature_scan')
-            ->store('signatures', 'public');
+                        ->store('signatures', 'public');
 
         Validation::create([
             'trainee_id'      => $trainee->id,
@@ -61,10 +90,12 @@ class ValidationController extends Controller
     public function show(Trainee $trainee)
     {
         $validation = $trainee->validation;
+
         if (!$validation) {
             return redirect()->route('trainees.show', $trainee)
                 ->with('error', 'Aucune validation trouvée!');
         }
+
         return view('validations.show', compact('trainee', 'validation'));
     }
 
@@ -72,6 +103,7 @@ class ValidationController extends Controller
     {
         $trainee = $validation->trainee;
         $validation->delete();
+
         return redirect()->route('trainees.show', $trainee)
             ->with('success', 'Validation supprimée!');
     }

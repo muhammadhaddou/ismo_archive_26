@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Trainee;
 use App\Models\Document;
 use App\Models\Movement;
+use App\Models\Validation;
 
 class DashboardController extends Controller
 {
@@ -12,14 +13,23 @@ class DashboardController extends Controller
     {
         $stats = [
             'total_stagiaires'  => Trainee::count(),
+
             'bac_temp_out'      => Document::where('type', 'Bac')
                                            ->where('status', 'Temp_Out')
                                            ->count(),
+
+            'bac_final_out'     => Document::where('type', 'Bac')
+                                           ->where('status', 'Final_Out')
+                                           ->count(),
+
             'diplomes_prets'    => Document::where('type', 'Diplome')
                                            ->where('status', 'Stock')
                                            ->count(),
+
             'mouvements_today'  => Movement::whereDate('date_action', today())
                                            ->count(),
+
+            'total_validations' => Validation::count(),
         ];
 
         $recent_movements = Movement::with(['document.trainee', 'user'])

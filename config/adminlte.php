@@ -169,12 +169,32 @@ return [
             'icon' => 'fas fa-check-double',
         ],
 
-        // ADMIN
+        // ADMINISTRATION
         ['header' => 'ADMINISTRATION'],
+
         [
             'text' => 'Utilisateurs',
             'url'  => 'users',
-            'icon' => 'fas fa-user-cog',
+            'icon' => 'fas fa-fw fa-user-cog',
+            'can'  => 'manage-users',
+        ],
+
+        [
+            'text'    => 'Paramètres',
+            'icon'    => 'fas fa-fw fa-cogs',
+            'can'     => 'manage-users',
+            'submenu' => [
+                [
+                    'text' => 'Secteurs',
+                    'url'  => 'secteurs',
+                    'icon' => 'fas fa-fw fa-building',
+                ],
+                [
+                    'text' => 'Filières',
+                    'url'  => 'filieres',
+                    'icon' => 'fas fa-fw fa-code-branch',
+                ],
+            ],
         ],
     ],
 

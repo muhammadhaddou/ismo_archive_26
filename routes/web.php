@@ -10,6 +10,8 @@ use App\Http\Controllers\ImportController;
 use App\Http\Controllers\ValidationController;
 use App\Http\Controllers\SecteurController;
 use App\Http\Controllers\FiliereController;
+use App\Http\Controllers\SearchController;
+
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
@@ -58,6 +60,7 @@ Route::middleware(['auth'])->group(function () {
     // Secteurs & Filières
     Route::resource('secteurs', SecteurController::class)->except(['show']);
     Route::resource('filieres', FiliereController::class)->except(['show']);
+    Route::get('search', [SearchController::class, 'index'])->name('search');
 });
 
 require __DIR__.'/auth.php';

@@ -11,6 +11,19 @@
 
 @section('content')
 
+{{-- 🔴 Alerte Bac dépassé --}}
+@if($stats['bac_expired'] > 0)
+<div class="alert alert-danger alert-dismissible fade show">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <h5><i class="fas fa-exclamation-triangle"></i> Attention !</h5>
+    <strong>{{ $stats['bac_expired'] }}</strong> stagiaire(s) ont dépassé le délai de 48h
+    pour le retour du Baccalauréat.
+    <a href="{{ url('documents/bac/temp-out') }}" class="btn btn-sm btn-danger ml-2">
+        <i class="fas fa-eye"></i> Voir la liste
+    </a>
+</div>
+@endif
+
 {{-- Stats Cards --}}
 <div class="row">
     <div class="col-lg-3 col-6">

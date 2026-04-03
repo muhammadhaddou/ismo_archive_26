@@ -22,6 +22,16 @@ class DashboardController extends Controller
                                            ->where('status', 'Final_Out')
                                            ->count(),
 
+            // 🔴 عدد المتأخرين (48h أو حسب deadline)
+            'bac_expired'       => Document::where('type', 'Bac')
+                                           ->where('status', 'Temp_Out')
+                                           ->whereHas('movements', function ($q) {
+                                               $q->where('action_type', 'Sortie')
+                                                 ->whereNotNull('deadline')
+                                                 ->where('deadline', '<', now());
+                                           })
+                                           ->count(),
+
             'diplomes_prets'    => Document::where('type', 'Diplome')
                                            ->where('status', 'Stock')
                                            ->count(),

@@ -15,17 +15,42 @@
             <div class="row">
 
                 <div class="col-md-6">
-                    <div class="form-group">
-                        <label>CIN *</label>
-                        <input type="text" name="cin" class="form-control @error('cin') is-invalid @enderror" value="{{ old('cin') }}">
+                    <div class="form-group border p-2 rounded">
+                        <label>CIN Stagiaire *</label>
+                        <input type="text" name="cin" class="form-control mb-2 @error('cin') is-invalid @enderror" value="{{ old('cin') }}" placeholder="Numéro CIN">
                         @error('cin')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        <label class="small text-muted mb-0"><i class="fas fa-file-upload"></i> Scan CIN Stagiaire (PDF/Image)</label>
+                        <input type="file" name="cin_scan" class="form-control-file @error('cin_scan') is-invalid @enderror">
+                        @error('cin_scan')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                 </div>
 
                 <div class="col-md-6">
-                    <div class="form-group">
+                    <div class="form-group border p-2 rounded">
+                        <label>CIN Père</label>
+                        <input type="text" name="cin_pere" class="form-control mb-2 @error('cin_pere') is-invalid @enderror" value="{{ old('cin_pere') }}" placeholder="Numéro CIN du père">
+                        @error('cin_pere')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        <label class="small text-muted mb-0"><i class="fas fa-file-upload"></i> Scan CIN Père (PDF/Image)</label>
+                        <input type="file" name="cin_pere_scan" class="form-control-file @error('cin_pere_scan') is-invalid @enderror">
+                        @error('cin_pere_scan')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group border p-2 rounded">
+                        <label>CIN Mère</label>
+                        <input type="text" name="cin_mere" class="form-control mb-2 @error('cin_mere') is-invalid @enderror" value="{{ old('cin_mere') }}" placeholder="Numéro CIN de la mère">
+                        @error('cin_mere')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        <label class="small text-muted mb-0"><i class="fas fa-file-upload"></i> Scan CIN Mère (PDF/Image)</label>
+                        <input type="file" name="cin_mere_scan" class="form-control-file @error('cin_mere_scan') is-invalid @enderror">
+                        @error('cin_mere_scan')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group p-2">
                         <label>CEF</label>
-                        <input type="text" name="cef" class="form-control @error('cef') is-invalid @enderror" value="{{ old('cef') }}">
+                        <input type="text" name="cef" class="form-control @error('cef') is-invalid @enderror" value="{{ old('cef') }}" placeholder="Numéro CEF">
                         @error('cef')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                 </div>
@@ -91,9 +116,21 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label>Année de promotion *</label>
-                        <input type="number" name="graduation_year"
-                               class="form-control @error('graduation_year') is-invalid @enderror"
-                               value="{{ old('graduation_year', date('Y')) }}">
+                        <select name="graduation_year" class="form-control @error('graduation_year') is-invalid @enderror">
+                            <option value="">-- Choisir --</option>
+                            @php
+                                $currentYear = date('Y');
+                                $years = [];
+                                for ($y = 2019; $y <= $currentYear; $y++) {
+                                    $years[] = $y . '-' . ($y + 1);
+                                }
+                            @endphp
+                            @foreach(array_reverse($years) as $yr)
+                                <option value="{{ $yr }}" {{ old('graduation_year', ($currentYear-1).'-'.$currentYear) == $yr ? 'selected' : '' }}>
+                                    {{ $yr }}
+                                </option>
+                            @endforeach
+                        </select>
                         @error('graduation_year')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                 </div>

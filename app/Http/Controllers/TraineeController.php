@@ -46,6 +46,8 @@ class TraineeController extends Controller
         $validated = $request->validate([
             'filiere_id'      => 'required|exists:filieres,id',
             'cin'             => 'required|unique:trainees,cin',
+            'cin_pere'        => 'nullable|string',
+            'cin_mere'        => 'nullable|string',
             'cef'             => 'nullable|string',
             'first_name'      => 'required|string|max:100',
             'last_name'       => 'required|string|max:100',
@@ -53,8 +55,25 @@ class TraineeController extends Controller
             'date_naissance'  => 'nullable|date',
             'phone'           => 'nullable|string|max:20',
             'group'           => 'required|string|max:10',
-            'graduation_year' => 'required|digits:4',
+            'graduation_year' => 'required|string|max:10',
+            'cin_scan'        => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'cin_pere_scan'   => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'cin_mere_scan'   => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'image_profile'   => 'nullable|image|max:5120',
         ]);
+
+        if ($request->hasFile('cin_scan')) {
+            $validated['cin_scan'] = $request->file('cin_scan')->store('scans_cin', 'public');
+        }
+        if ($request->hasFile('cin_pere_scan')) {
+            $validated['cin_pere_scan'] = $request->file('cin_pere_scan')->store('scans_cin', 'public');
+        }
+        if ($request->hasFile('cin_mere_scan')) {
+            $validated['cin_mere_scan'] = $request->file('cin_mere_scan')->store('scans_cin', 'public');
+        }
+        if ($request->hasFile('image_profile')) {
+            $validated['image_profile'] = $request->file('image_profile')->store('profiles', 'public');
+        }
 
         Trainee::create($validated);
 
@@ -79,6 +98,8 @@ class TraineeController extends Controller
         $validated = $request->validate([
             'filiere_id'      => 'required|exists:filieres,id',
             'cin'             => 'required|unique:trainees,cin,' . $trainee->id,
+            'cin_pere'        => 'nullable|string',
+            'cin_mere'        => 'nullable|string',
             'cef'             => 'nullable|string',
             'first_name'      => 'required|string|max:100',
             'last_name'       => 'required|string|max:100',
@@ -86,8 +107,25 @@ class TraineeController extends Controller
             'date_naissance'  => 'nullable|date',
             'phone'           => 'nullable|string|max:20',
             'group'           => 'required|string|max:10',
-            'graduation_year' => 'required|digits:4',
+            'graduation_year' => 'required|string|max:10',
+            'cin_scan'        => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'cin_pere_scan'   => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'cin_mere_scan'   => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'image_profile'   => 'nullable|image|max:5120',
         ]);
+
+        if ($request->hasFile('cin_scan')) {
+            $validated['cin_scan'] = $request->file('cin_scan')->store('scans_cin', 'public');
+        }
+        if ($request->hasFile('cin_pere_scan')) {
+            $validated['cin_pere_scan'] = $request->file('cin_pere_scan')->store('scans_cin', 'public');
+        }
+        if ($request->hasFile('cin_mere_scan')) {
+            $validated['cin_mere_scan'] = $request->file('cin_mere_scan')->store('scans_cin', 'public');
+        }
+        if ($request->hasFile('image_profile')) {
+            $validated['image_profile'] = $request->file('image_profile')->store('profiles', 'public');
+        }
 
         $trainee->update($validated);
 

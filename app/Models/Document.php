@@ -8,7 +8,7 @@ class Document extends Model
 {
     protected $fillable = [
         'trainee_id', 'type', 'level_year',
-        'status', 'reference_number'
+        'status', 'reference_number', 'scan_file'
     ];
 
     public function trainee()
@@ -19,5 +19,12 @@ class Document extends Model
     public function movements()
     {
         return $this->hasMany(Movement::class);
+    }
+
+    public function latestSortie()
+    {
+        return $this->hasOne(Movement::class)
+            ->where('action_type', 'Sortie')
+            ->latestOfMany();
     }
 }

@@ -31,14 +31,11 @@ class DashboardController extends Controller
                                            ->count(),
 
             // Nombre de Bac expirés (délai dépassé)
-            'bac_expired'       => DB::table('documents')
-                                     ->join('movements', 'documents.id', '=', 'movements.document_id')
-                                     ->where('documents.type', 'Bac')
-                                     ->where('documents.status', 'Temp_Out')
-                                     ->where('movements.action_type', 'Sortie')
-                                     ->whereNotNull('movements.deadline')
-                                     ->where('movements.deadline', '<', now())
-                                     ->count(),
+            'bac_expired'       => Document::where('type', 'Bac')
+                                           ->where('status', 'Temp_Out')
+                                           ->whereHas('latestSortie', function($q) {
+                                               $q->where('deadline', '<', now());
+                                           })->count(),
 
             // Nombre de diplômes disponibles en stock
             'diplomes_prets'    => Document::where('type', 'Diplome')
@@ -67,23 +64,27 @@ class DashboardController extends Controller
         // 🔹 Alertes Bac (≥ 40h)
         $bac_alerts = Document::where('type', 'Bac')
                               ->where('status', 'Temp_Out')
-                              ->with([
-                                  'trainee',
-                                  'movements' => function ($q) {
-                                      $q->where('action_type', 'Sortie')
-                                        ->latest('date_action');
-                                  }
-                              ])
+                              ->with(['trainee', 'latestSortie'])
                               ->get()
                               ->map(function ($doc) {
 
-                                  $sortie = $doc->movements->first();
+                                  $sortie = $doc->latestSortie;
 
-                                  $hours = $sortie
-                                      ? Carbon::parse($sortie->date_action)->diffInHours(now())
-                                      : null;
+                                  if (!$sortie) return null;
 
+                                  $dateAction = Carbon::parse($sortie->date_action);
+                                  $diff = $dateAction->diff(now());
+
+                                  $hours = (int) $dateAction->diffInHours(now());
                                   $doc->hours_out = $hours;
+
+                                  $parts = [];
+                                  if ($diff->d > 0) $parts[] = $diff->d . 'j';
+                                  if ($diff->h > 0) $parts[] = $diff->h . 'h';
+                                  if ($diff->i > 0) $parts[] = $diff->i . 'm';
+                                  if ($diff->s > 0) $parts[] = $diff->s . 's';
+
+                                  $doc->time_out_str = implode(' ', $parts) ?: '0s';
 
                                   $doc->alert_level = match (true) {
                                       $hours >= 48 => 'ecoule',
@@ -93,7 +94,8 @@ class DashboardController extends Controller
 
                                   return $doc;
                               })
-                              ->filter(fn($d) => $d->hours_out !== null && $d->hours_out >= 40);
+                              ->filter(fn($d) => $d->hours_out !== null && $d->hours_out >= 40)
+                              ->sortByDesc('hours_out');
 
         // 🔹 Documents écoulés
         $ecouleDocs = Document::where('status', 'Ecoule')

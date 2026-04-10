@@ -8,24 +8,45 @@ use App\Models\Filiere;
 use App\Models\Movement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class DocumentController extends Controller
 {
     public function index(Request $request)
     {
-        $type = $request->input('type');
+        // Read type from query string OR from route defaults (e.g. ->defaults('type', 'Bac'))
+        $type = $request->input('type') ?? $request->route('type');
 
         $documents = Document::with('trainee.filiere')
             ->when($type, fn($q) => $q->where('type', $type))
+            ->when($request->search, function($q) use ($request) {
+                $q->whereHas('trainee', function($q) use ($request) {
+                    $q->where('last_name',  'like', '%'.$request->search.'%')
+                      ->orWhere('first_name','like', '%'.$request->search.'%');
+                });
+            })
+            ->when($request->cin, function($q) use ($request) {
+                $q->whereHas('trainee', function($q) use ($request) {
+                    $q->where('cin', 'like', '%'.$request->cin.'%')
+                      ->orWhere('cef', 'like', '%'.$request->cin.'%');
+                });
+            })
+            ->when($request->status, fn($q) => $q->where('status', $request->status))
+            ->when($request->filiere_id, fn($q) =>
+                $q->whereHas('trainee', fn($q) => $q->where('filiere_id', $request->filiere_id))
+            )
             ->latest()
-            ->paginate(15);
+            ->paginate(20)
+            ->withQueryString();
 
-        return view('documents.index', compact('documents', 'type'));
+        $filieres = Filiere::orderBy('code_filiere')->get();
+
+        return view('documents.index', compact('documents', 'type', 'filieres'));
     }
 
     public function create()
     {
-        $trainees = Trainee::orderBy('last_name')->get();
+        $trainees = Trainee::with('filiere')->orderBy('last_name')->get();
         return view('documents.create', compact('trainees'));
     }
 
@@ -36,11 +57,17 @@ class DocumentController extends Controller
             'type'             => 'required|in:Bac,Diplome,Attestation,Bulletin',
             'level_year'       => 'nullable|in:1,2',
             'reference_number' => 'nullable|string|max:100',
+            'scan_file'        => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);
 
         $status = $request->type === 'Bac'
             ? ($request->bac_status ?? 'Temp_Out')
             : 'Stock';
+
+        $scanPath = null;
+        if ($request->hasFile('scan_file')) {
+            $scanPath = $request->file('scan_file')->store('documents_scans', 'public');
+        }
 
         $document = Document::create([
             'trainee_id'       => $request->trainee_id,
@@ -48,6 +75,7 @@ class DocumentController extends Controller
             'level_year'       => $request->level_year,
             'status'           => $status,
             'reference_number' => $request->reference_number,
+            'scan_file'        => $scanPath,
         ]);
 
         $actionType = ($request->type === 'Bac' && $status !== 'Stock')
@@ -76,7 +104,7 @@ class DocumentController extends Controller
             'Final_Out' => redirect()->route('documents.bac.final-out')
                 ->with('success', 'Bac en retrait définitif ✅'),
 
-            default => redirect()->route('documents.index')
+            default => redirect()->route('trainees.show', $request->trainee_id)
                 ->with('success', 'Document ajouté ✅'),
         };
     }
@@ -131,6 +159,24 @@ class DocumentController extends Controller
             ->with('success', 'Retour effectué ✅');
     }
 
+    public function uploadScan(Request $request, Document $document)
+    {
+        $request->validate([
+            'scan_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ]);
+
+        // Delete old scan if exists
+        if ($document->scan_file) {
+            Storage::disk('public')->delete($document->scan_file);
+        }
+
+        $scanPath = $request->file('scan_file')->store('documents_scans', 'public');
+        $document->update(['scan_file' => $scanPath]);
+
+        return redirect()->route('trainees.show', $document->trainee_id)
+            ->with('success', 'Scan uploadé avec succès ✅');
+    }
+
     // 🟡 Retraits temporaires (UPDATED)
     public function tempOut(Request $request)
     {
@@ -155,10 +201,19 @@ class DocumentController extends Controller
         $documents = Document::with(['trainee.filiere', 'movements'])
             ->where('type', 'Bac')
             ->where('status', 'Temp_Out')
-            ->whereHas('movements', function($q) {
-                $q->where('action_type', 'Sortie')
-                  ->where('deadline', '>=', now());
+            ->whereHas('latestSortie', function($q) {
+                $q->where('deadline', '>=', now());
             })
+            ->when($request->search, fn($q) =>
+                $q->whereHas('trainee', fn($q) =>
+                    $q->where('last_name',  'like', '%'.$request->search.'%')
+                      ->orWhere('first_name','like', '%'.$request->search.'%')
+                ))
+            ->when($request->cin, fn($q) =>
+                $q->whereHas('trainee', fn($q) =>
+                    $q->where('cin', 'like', '%'.$request->cin.'%')
+                      ->orWhere('cef', 'like', '%'.$request->cin.'%')
+                ))
             ->when($request->filiere_id, fn($q) =>
                 $q->whereHas('trainee', fn($q) =>
                     $q->where('filiere_id', $request->filiere_id)))
@@ -197,9 +252,8 @@ class DocumentController extends Controller
         $documents = Document::with('trainee.filiere', 'movements')
             ->where('type', 'Bac')
             ->where('status', 'Temp_Out')
-            ->whereHas('movements', function($q) {
-                $q->where('action_type', 'Sortie')
-                  ->where('deadline', '<', now());
+            ->whereHas('latestSortie', function($q) {
+                $q->where('deadline', '<', now());
             })
             ->when($request->filiere_id, fn($q) =>
                 $q->whereHas('trainee', fn($q) =>

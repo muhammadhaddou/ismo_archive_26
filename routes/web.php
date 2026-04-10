@@ -55,6 +55,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('documents/{document}/sortie', [DocumentController::class, 'sortie'])->name('documents.sortie');
     Route::post('documents/{document}/retour', [DocumentController::class, 'retour'])->name('documents.retour');
+    Route::post('documents/{document}/scan',   [DocumentController::class, 'uploadScan'])->name('documents.scan');
 
     // Movements
     Route::get('movements',       [MovementController::class, 'index'])->name('movements.index');
@@ -111,18 +112,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/diplomes-prets/{trainee}/signature',       [DiplomesPrêtsController::class, 'saveSignature'])->name('diplomes.saveSignature');
 
 });
-<<<<<<< HEAD
-
-=======
-// signateur validation path 
-Route::post('/diplomes-prets/{trainee}/check-promote', [DiplomesPrêtsController::class, 'checkAndPromote'])->name('diplomes.checkPromote');
-Route::post('/diplomes-prets/{trainee}/signature',     [DiplomesPrêtsController::class, 'saveSignature'])->name('diplomes.saveSignature');
 //Tableau de bord par filière
 Route::get('filieres/{filiere}/stats', [FiliereStatsController::class, 'index'])->name('filieres.stats');
-<<<<<<< HEAD
->>>>>>> 04b0ddcca98592b7bcb1fee43c893b11684d8351
-=======
->>>>>>> 04b0ddcca98592b7bcb1fee43c893b11684d8351
 // Routes avec rôles (admin, agent)
 Route::middleware(['auth', 'role:admin|agent'])->group(function () {
 

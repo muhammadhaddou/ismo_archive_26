@@ -14,6 +14,8 @@ class Trainee extends Model
         'id_inscription_session_programme',
         'matricule_etudiant',
         'cin',
+        'cin_pere',
+        'cin_mere',
         'cef',
         'first_name',
         'last_name',

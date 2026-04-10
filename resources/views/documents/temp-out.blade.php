@@ -21,6 +21,32 @@
         <form method="GET" action="{{ route('documents.bac.temp-out') }}">
             <div class="row">
 
+                {{-- Recherche par Nom --}}
+                <div class="col-md-3 mb-2">
+                    <label class="font-weight-bold small">Nom / Prénom</label>
+                    <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                        </div>
+                        <input type="text" name="search" class="form-control"
+                               placeholder="Rechercher par nom..."
+                               value="{{ request('search') }}">
+                    </div>
+                </div>
+
+                {{-- Recherche par CIN / CEF --}}
+                <div class="col-md-3 mb-2">
+                    <label class="font-weight-bold small">CIN / CEF</label>
+                    <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                        </div>
+                        <input type="text" name="cin" class="form-control"
+                               placeholder="Rechercher par CIN ou CEF..."
+                               value="{{ request('cin') }}">
+                    </div>
+                </div>
+
                 <div class="col-md-3">
                     <label>Filière</label>
                     <select name="filiere_id" class="form-control select2">
@@ -73,12 +99,12 @@
                     </select>
                 </div>
 
-                <div class="col-md-3 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary mr-2">
+                <div class="col-md-2 d-flex align-items-end mt-2" style="gap:6px">
+                    <button type="submit" class="btn btn-primary btn-sm flex-fill">
                         <i class="fas fa-filter"></i> Filtrer
                     </button>
-                    <a href="{{ route('documents.bac.temp-out') }}" class="btn btn-secondary">
-                        <i class="fas fa-times"></i> Reset
+                    <a href="{{ route('documents.bac.temp-out') }}" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-times"></i>
                     </a>
                 </div>
 

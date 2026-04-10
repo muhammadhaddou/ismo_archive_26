@@ -214,15 +214,45 @@
                             @endif
 
                             @if($doc)
-                                <br>
-                                <a href="{{ route('documents.show', $doc) }}"
-                                   class="btn btn-xs btn-outline-primary mt-1"
-                                   style="font-size:11px">
-                                    <i class="fas fa-eye"></i> Voir
-                                </a>
+                                @if($doc->reference_number)
+                                    <div class="mt-2 text-left" style="font-size:12px; background: rgba(0,0,0,0.03); padding: 5px; border-radius: 4px;">
+                                        <strong>Réf:</strong> {{ $doc->reference_number }}
+                                        @if($doc->level_year)
+                                        <br><strong>Année:</strong> {{ $doc->level_year }}
+                                        @endif
+                                    </div>
+                                @elseif($doc->level_year)
+                                    <div class="mt-2 text-left" style="font-size:12px; background: rgba(0,0,0,0.03); padding: 5px; border-radius: 4px;">
+                                        <strong>Année:</strong> {{ $doc->level_year }}
+                                    </div>
+                                @endif
+                                
+                                <div class="mt-1 d-flex justify-content-center flex-wrap" style="gap: 4px;">
+                                    <a href="{{ route('documents.show', $doc) }}"
+                                       class="btn btn-xs btn-outline-primary"
+                                       style="font-size:11px">
+                                        <i class="fas fa-eye"></i> Voir
+                                    </a>
+                                    @if($doc->scan_file)
+                                    <a href="{{ asset('storage/' . $doc->scan_file) }}"
+                                       target="_blank"
+                                       class="btn btn-xs btn-outline-success"
+                                       style="font-size:11px">
+                                        <i class="fas fa-file-pdf"></i> Scan
+                                    </a>
+                                    @endif
+                                    {{-- Bouton upload scan --}}
+                                    <button type="button"
+                                            class="btn btn-xs btn-outline-secondary"
+                                            style="font-size:11px"
+                                            data-toggle="modal"
+                                            data-target="#scanModal{{ $doc->id }}">
+                                        <i class="fas fa-upload"></i> {{ $doc->scan_file ? 'Remplacer' : 'Upload Scan' }}
+                                    </button>
+                                </div>
                             @else
                                 <br>
-                                <a href="{{ route('documents.create') }}?trainee_id={{ $trainee->id }}"
+                                <a href="{{ route('documents.create', ['trainee_id' => $trainee->id, 'type' => $type]) }}"
                                    class="btn btn-xs btn-outline-danger mt-1"
                                    style="font-size:11px">
                                     <i class="fas fa-plus"></i> Ajouter
@@ -290,4 +320,44 @@
 
     </div>
 </div>
+
+{{-- Modals Upload Scan (un par document) --}}
+@foreach(['Bac','Diplome','Attestation','Bulletin'] as $type)
+@php $doc = $trainee->documents->where('type', $type)->first(); @endphp
+@if($doc)
+<div class="modal fade" id="scanModal{{ $doc->id }}" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form action="{{ route('documents.scan', $doc) }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-header bg-secondary text-white">
+                    <h5 class="modal-title"><i class="fas fa-upload mr-2"></i> Upload Scan — {{ $type }}</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    @if($doc->scan_file)
+                    <div class="alert alert-info py-2">
+                        <i class="fas fa-info-circle"></i> Un scan existe déjà. L'upload remplacera l'ancien fichier.
+                        <br>
+                        <a href="{{ asset('storage/' . $doc->scan_file) }}" target="_blank" class="btn btn-sm btn-outline-info mt-1">
+                            <i class="fas fa-eye"></i> Voir scan actuel
+                        </a>
+                    </div>
+                    @endif
+                    <div class="form-group mb-0">
+                        <label class="font-weight-bold">Fichier (PDF, JPG, PNG — max 5MB)</label>
+                        <input type="file" name="scan_file" class="form-control-file" accept=".pdf,.jpg,.jpeg,.png" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
+@endforeach
+
 @stop

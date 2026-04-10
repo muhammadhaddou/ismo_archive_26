@@ -83,3 +83,5 @@ class DiplomesPrêtsController extends Controller
         ]);
     }
 }
+
+ 

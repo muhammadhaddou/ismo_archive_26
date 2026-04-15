@@ -76,7 +76,17 @@
                             </td>
                             <td>{{ $mv->user->name }}</td>
                             <td>{{ $mv->date_action->format('d/m/Y H:i') }}</td>
-                            <td>{{ $mv->observations ?? '—' }}</td>
+                            <td>
+                                {{ $mv->observations ?? '—' }}
+                                @if($mv->is_proxy)
+                                    <br><small class="text-primary">
+                                        <i class="fas fa-user-shield"></i> Par procuration ({{ $mv->proxy_name }} - {{ $mv->proxy_cin }})
+                                        @if($mv->proxy_document_path)
+                                            <a href="{{ Storage::url($mv->proxy_document_path) }}" target="_blank" class="ml-1"><i class="fas fa-download"></i> Scan</a>
+                                        @endif
+                                    </small>
+                                @endif
+                            </td>
                         </tr>
                         @empty
                         <tr><td colspan="4" class="text-center">Aucun mouvement</td></tr>
@@ -92,7 +102,7 @@
 <div class="modal fade" id="sortieModal">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="{{ route('documents.sortie', $document) }}" method="POST">
+            <form action="{{ route('documents.sortie', $document) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-header bg-warning">
                     <h5 class="modal-title">Retrait du document</h5>
@@ -110,6 +120,28 @@
                         <label>Observations</label>
                         <textarea name="observations" class="form-control" rows="3"></textarea>
                     </div>
+
+                    <div class="form-group">
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" id="isProxyCheck" name="is_proxy" value="1">
+                            <label class="custom-control-label" for="isProxyCheck">Saisi par procuration (ولي الأمر / بوكالة)</label>
+                        </div>
+                    </div>
+
+                    <div id="proxyFields" style="display: none; background: #f8f9fa; padding: 15px; border-radius: 5px; border-left: 3px solid #ffc107; margin-bottom: 1rem;">
+                        <div class="form-group">
+                            <label>Nom du mandataire (اسم المستلم)</label>
+                            <input type="text" name="proxy_name" class="form-control" placeholder="Nom complet">
+                        </div>
+                        <div class="form-group">
+                            <label>CIN du mandataire (رقم البطاقة الوطنية)</label>
+                            <input type="text" name="proxy_cin" class="form-control" placeholder="Ex: AB123456">
+                        </div>
+                        <div class="form-group mb-0">
+                            <label>Scan de la procuration (صورة الوكالة)</label>
+                            <input type="file" name="proxy_document" class="form-control-file" accept=".pdf,.jpg,.jpeg,.png">
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
@@ -119,4 +151,25 @@
         </div>
     </div>
 </div>
+@stop
+
+@section('js')
+<script>
+    document.getElementById('isProxyCheck').addEventListener('change', function() {
+        document.getElementById('proxyFields').style.display = this.checked ? 'block' : 'none';
+        
+        // Toggle required attributes dynamically
+        const inputs = document.querySelectorAll('#proxyFields input');
+        inputs.forEach(input => {
+            if (this.checked) {
+                input.setAttribute('required', 'required');
+            } else {
+                input.removeAttribute('required');
+                if (input.type !== 'checkbox' && input.type !== 'radio') {
+                    input.value = ''; // clear values on hide
+                }
+            }
+        });
+    });
+</script>
 @stop

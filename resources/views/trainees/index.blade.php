@@ -34,6 +34,10 @@
         <form method="GET" action="{{ route('trainees.index') }}" id="filter-form">
             <div class="row">
                 <div class="col-md-3">
+                    <label>Recherche</label>
+                    <input type="text" name="search" class="form-control" placeholder="CIN, CEF, Nom..." value="{{ request('search') }}">
+                </div>
+                <div class="col-md-3">
                     <label>Filière</label>
                     <select name="filiere_id" id="filiere-select" class="form-control select2">
                         <option value="">— Toutes les filières —</option>
@@ -44,7 +48,7 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label>Groupe</label>
                     <select name="group" id="group-select" class="form-control">
                         <option value="">— Tous les groupes —</option>
@@ -55,7 +59,7 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label>Année</label>
                     <select name="graduation_year" id="year-select" class="form-control">
                         <option value="">— Toutes les années —</option>
@@ -66,12 +70,12 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-3 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary mr-2">
-                        <i class="fas fa-filter"></i> Filtrer
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary mr-2" title="Filtrer">
+                        <i class="fas fa-search"></i>
                     </button>
-                    <a href="{{ route('trainees.index') }}" class="btn btn-secondary">
-                        <i class="fas fa-times"></i> Reset
+                    <a href="{{ route('trainees.index') }}" class="btn btn-secondary" title="Reset">
+                        <i class="fas fa-times"></i>
                     </a>
                 </div>
             </div>

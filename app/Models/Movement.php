@@ -13,6 +13,10 @@ class Movement extends Model
         'date_action',
         'deadline',
         'observations',
+        'is_proxy',
+        'proxy_name',
+        'proxy_cin',
+        'proxy_document_path',
     ];
 
     protected $casts = [

@@ -14,6 +14,14 @@ class TraineeController extends Controller
     public function index(Request $request)
     {
         $trainees = Trainee::with(['filiere', 'documents'])
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $query->where(function($q) use ($request) {
+                    $q->where('cin', 'like', '%' . $request->search . '%')
+                      ->orWhere('cef', 'like', '%' . $request->search . '%')
+                      ->orWhere('first_name', 'like', '%' . $request->search . '%')
+                      ->orWhere('last_name', 'like', '%' . $request->search . '%');
+                });
+            })
             ->when($request->filled('filiere_id'), function ($query) use ($request) {
                 $query->where('filiere_id', $request->filiere_id);
             })

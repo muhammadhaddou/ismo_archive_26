@@ -120,6 +120,10 @@ class DocumentController extends Controller
         $request->validate([
             'action_type'  => 'required|in:Temp_Out,Final_Out',
             'observations' => 'nullable|string',
+            'is_proxy'     => 'nullable|boolean',
+            'proxy_name'   => 'nullable|string|required_if:is_proxy,1',
+            'proxy_cin'    => 'nullable|string|required_if:is_proxy,1',
+            'proxy_document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120|required_if:is_proxy,1',
         ]);
 
         $document->update([
@@ -130,13 +134,22 @@ class DocumentController extends Controller
             ? now()->addHours(48)
             : null;
 
+        $proxyPath = null;
+        if ($request->hasFile('proxy_document')) {
+            $proxyPath = $request->file('proxy_document')->store('procurations', 'public');
+        }
+
         Movement::create([
-            'document_id'  => $document->id,
-            'user_id'      => Auth::id(),
-            'action_type'  => 'Sortie',
-            'date_action'  => now(),
-            'deadline'     => $deadline,
-            'observations' => $request->observations,
+            'document_id'         => $document->id,
+            'user_id'             => Auth::id(),
+            'action_type'         => 'Sortie',
+            'date_action'         => now(),
+            'deadline'            => $deadline,
+            'observations'        => $request->observations,
+            'is_proxy'            => $request->boolean('is_proxy'),
+            'proxy_name'          => $request->proxy_name,
+            'proxy_cin'           => $request->proxy_cin,
+            'proxy_document_path' => $proxyPath,
         ]);
 
         return redirect()->route('documents.show', $document)

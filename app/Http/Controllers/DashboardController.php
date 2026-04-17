@@ -10,7 +10,7 @@ use App\Models\Movement;
 use App\Models\Validation;
 use Carbon\Carbon;
 
-class DashboardController extends Controller
+class DashboardController extends Controllerلهف
 {
     public function index()
     {

@@ -56,6 +56,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('documents/{document}/sortie', [DocumentController::class, 'sortie'])->name('documents.sortie');
     Route::post('documents/{document}/retour', [DocumentController::class, 'retour'])->name('documents.retour');
     Route::post('documents/{document}/scan',   [DocumentController::class, 'uploadScan'])->name('documents.scan');
+    Route::get('scans/{path}',                 [\App\Http\Controllers\ScanController::class, 'show'])->where('path', '.*')->name('scans.show');
 
     // Movements
     Route::get('movements',       [MovementController::class, 'index'])->name('movements.index');
@@ -130,6 +131,9 @@ Route::prefix('espace-stagiaire')->name('trainee.')->group(function () {
     Route::post('login', [App\Http\Controllers\TraineeAuthController::class, 'login']);
     
     Route::middleware(['auth.trainee'])->group(function () {
+        Route::get('password/setup', [App\Http\Controllers\TraineeAuthController::class, 'showPasswordSetupForm'])->name('password.setup');
+        Route::post('password/setup', [App\Http\Controllers\TraineeAuthController::class, 'setupPassword'])->name('password.store');
+        
         Route::get('dashboard', [App\Http\Controllers\TraineePortalController::class, 'dashboard'])->name('dashboard');
         Route::post('requests', [App\Http\Controllers\TraineePortalController::class, 'storeRequest'])->name('requests.store');
         Route::post('logout', [App\Http\Controllers\TraineeAuthController::class, 'logout'])->name('logout');

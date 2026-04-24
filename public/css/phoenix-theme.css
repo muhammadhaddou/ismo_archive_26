@@ -1,0 +1,261 @@
+/* 
+  Global CSS override to mimic "Phoenix" Template across AdminLTE 
+*/
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+body, .content-wrapper, .main-header, .main-sidebar, .card, .table, .btn {
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* --- Layout Backgrounds --- */
+.content-wrapper {
+    background-color: #f8fafc !important; /* Very light slate gray */
+}
+
+/* --- Navbar --- */
+.main-header.navbar {
+    border-bottom: 1px solid #f1f5f9 !important;
+    box-shadow: none !important;
+}
+
+/* --- Sidebar --- */
+.sidebar-light-primary {
+    background-color: #ffffff !important;
+    border-right: 1px solid #e2e8f0 !important;
+    box-shadow: none !important;
+}
+.sidebar-light-primary .nav-sidebar > .nav-item > .nav-link.active {
+    background-color: #e0e7ff !important;
+    color: #4338ca !important;
+    border-radius: 8px;
+    font-weight: 600;
+}
+.sidebar-light-primary .nav-sidebar > .nav-item > .nav-link {
+    color: #475569 !important;
+    border-radius: 8px;
+    margin: 2px 8px;
+    transition: all 0.2s;
+}
+.sidebar-light-primary .nav-sidebar > .nav-item > .nav-link:hover {
+    background-color: #f1f5f9 !important;
+}
+
+/* --- Cards --- */
+.card {
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+    transition: box-shadow 0.3s ease-in-out;
+}
+.card-header {
+    background-color: transparent !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    padding: 1.25rem 1.25rem 0.75rem !important;
+}
+.card-title {
+    font-weight: 600 !important;
+    color: #1e293b !important;
+}
+
+/* --- Tables --- */
+.table thead, .table thead[class*="bg-"] {
+    background-color: #f1f5f9 !important; /* Doux et moderne */
+    border-bottom: 2px solid #cbd5e1 !important;
+}
+.table thead th {
+    border-top: none !important;
+    border-bottom: none !important;
+    background-color: transparent !important;
+    color: #334155 !important;
+    font-size: 0.8rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px !important;
+    text-transform: uppercase;
+}
+.table-hover tbody tr:hover {
+    background-color: #f8fafc !important;
+}
+.table td, .table th {
+    vertical-align: middle !important;
+    border-top: 1px solid #f1f5f9 !important;
+}
+
+/* --- Buttons --- */
+.btn {
+    border-radius: 6px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.3px;
+}
+.btn-primary { background-color: #3b82f6 !important; border-color: #3b82f6 !important; }
+.btn-success { background-color: #10b981 !important; border-color: #10b981 !important; }
+.btn-warning { background-color: #f59e0b !important; border-color: #f59e0b !important; color: white !important; }
+.btn-danger { background-color: #ef4444 !important; border-color: #ef4444 !important; }
+.btn-info { background-color: #0ea5e9 !important; border-color: #0ea5e9 !important; }
+
+/* --- Soft Badges Global Override --- */
+.badge {
+    padding: 0.35em 0.65em !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+}
+.badge-primary { background-color: #e0e7ff !important; color: #4338ca !important; }
+.badge-success { background-color: #dcfce7 !important; color: #15803d !important; }
+.badge-warning { background-color: #fef3c7 !important; color: #b45309 !important; }
+.badge-danger { background-color: #fee2e2 !important; color: #b91c1c !important; }
+.badge-info { background-color: #e0f2fe !important; color: #0369a1 !important; }
+.badge-secondary { background-color: #f1f5f9 !important; color: #475569 !important; }
+
+/* Remove ugly AdminLTE card colors that we want to look clean */
+.card-primary.card-outline { border-top: 3px solid #3b82f6 !important; }
+.card-success.card-outline { border-top: 3px solid #10b981 !important; }
+.card-warning.card-outline { border-top: 3px solid #f59e0b !important; }
+.card-danger.card-outline { border-top: 3px solid #ef4444 !important; }
+
+/* Forms */
+.form-control {
+    border-radius: 6px !important;
+    border: 1px solid #cbd5e1 !important;
+}
+.form-control:focus {
+    border-color: #93c5fd !important;
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25) !important;
+}
+
+/* --- Dark Mode Override (Professional Theme) --- */
+body.dark-mode .content-wrapper {
+    background-color: #0b0f19 !important; /* Très sombre, moderne */
+}
+body.dark-mode .main-header.navbar {
+    background-color: #131b2f !important;
+    border-bottom: 1px solid #1f2937 !important;
+}
+body.dark-mode .sidebar-light-primary {
+    background-color: #131b2f !important; /* Même fond que la navbar */
+    border-right: 1px solid #1f2937 !important;
+}
+body.dark-mode .brand-link {
+    background-color: #131b2f !important;
+    color: #f3f4f6 !important;
+    border-bottom: 1px solid #1f2937 !important;
+}
+body.dark-mode .brand-text {
+    color: #f3f4f6 !important;
+}
+body.dark-mode .sidebar-light-primary .nav-sidebar > .nav-item > .nav-link {
+    color: #9ca3af !important;
+}
+body.dark-mode .sidebar-light-primary .nav-sidebar > .nav-item > .nav-link.active {
+    background-color: #1e3a8a !important; /* Deep Blue */
+    color: #ffffff !important;
+}
+body.dark-mode .sidebar-light-primary .nav-sidebar > .nav-item > .nav-link:hover {
+    background-color: #1f2937 !important;
+    color: #f3f4f6 !important;
+}
+body.dark-mode .card, body.dark-mode .phoenix-card {
+    background-color: #131b2f !important;
+    border: 1px solid #1f2937 !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5) !important;
+}
+body.dark-mode .card-header {
+    border-bottom: 1px solid #1f2937 !important;
+    background-color: transparent !important;
+}
+body.dark-mode .card-title,
+body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, 
+body.dark-mode h4, body.dark-mode h5, body.dark-mode h6,
+body.dark-mode .text-dark {
+    color: #f3f4f6 !important;
+}
+body.dark-mode .table thead, body.dark-mode .table thead[class*="bg-"] {
+    background-color: #1f2937 !important;
+    border-bottom: 2px solid #374151 !important;
+}
+body.dark-mode .table thead th {
+    color: #d1d5db !important;
+    border: none !important;
+}
+body.dark-mode .table td, body.dark-mode .table th {
+    border-top: 1px solid #1f2937 !important;
+    color: #9ca3af !important;
+}
+body.dark-mode .table-bordered, 
+body.dark-mode .table-bordered td, 
+body.dark-mode .table-bordered th {
+    border-color: #1f2937 !important; /* Fix des bordures blanches affreuses */
+}
+body.dark-mode .table-hover tbody tr:hover {
+    background-color: #1f2937 !important;
+}
+body.dark-mode .text-muted {
+    color: #6b7280 !important;
+}
+body.dark-mode .form-control {
+    background-color: #0b0f19 !important;
+    border: 1px solid #374151 !important;
+    color: #e5e7eb !important;
+}
+body.dark-mode .form-control:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25) !important;
+}
+/* Liens (numéros de tel, etc.) */
+body.dark-mode a:not(.btn):not(.nav-link) {
+    color: #60a5fa !important; /* Bleu clair lisible */
+}
+body.dark-mode a:not(.btn):not(.nav-link):hover {
+    color: #93c5fd !important;
+}
+/* Pagination */
+body.dark-mode .page-link {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+    color: #d1d5db !important;
+}
+body.dark-mode .page-item.active .page-link {
+    background-color: #3b82f6 !important;
+    border-color: #3b82f6 !important;
+    color: #ffffff !important;
+}
+body.dark-mode .page-item.disabled .page-link {
+    background-color: #131b2f !important;
+    color: #4b5563 !important;
+}
+/* Navbar Top Icons */
+body.dark-mode .main-header.navbar .nav-link {
+    color: #d1d5db !important;
+}
+body.dark-mode .main-header.navbar .nav-link:hover {
+    color: #ffffff !important;
+}
+/* Badges en mode sombre */
+body.dark-mode .badge-light {
+    background-color: #374151 !important;
+    color: #e5e7eb !important;
+    border: 1px solid #4b5563 !important;
+}
+
+/* Select2 en mode sombre */
+body.dark-mode .select2-container--default .select2-selection--single {
+    background-color: #0b0f19 !important;
+    border: 1px solid #374151 !important;
+}
+body.dark-mode .select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #e5e7eb !important;
+}
+body.dark-mode .select2-dropdown {
+    background-color: #131b2f !important;
+    border: 1px solid #374151 !important;
+}
+body.dark-mode .select2-search__field {
+    background-color: #0b0f19 !important;
+    border: 1px solid #374151 !important;
+    color: #f3f4f6 !important;
+}
+body.dark-mode .select2-container--default .select2-results__option[aria-selected=true] {
+    background-color: #1f2937 !important;
+}
+body.dark-mode .select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: #3b82f6 !important;
+    color: white !important;
+}

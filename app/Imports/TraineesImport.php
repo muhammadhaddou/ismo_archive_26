@@ -8,9 +8,11 @@ use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 
-class TraineesImport implements SkipsEmptyRows, ToModel, WithHeadingRow
+class TraineesImport implements SkipsEmptyRows, ToModel, WithHeadingRow, WithChunkReading, ShouldQueue
 {
     public function model(array $row)
     {
@@ -106,5 +108,10 @@ class TraineesImport implements SkipsEmptyRows, ToModel, WithHeadingRow
     {
         $y = $this->pick($row, ['annee']);
         return $y ? (int)$y : date('Y');
+    }
+
+    public function chunkSize(): int
+    {
+        return 500;
     }
 }

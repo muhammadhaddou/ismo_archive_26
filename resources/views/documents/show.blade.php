@@ -82,7 +82,7 @@
                                     <br><small class="text-primary">
                                         <i class="fas fa-user-shield"></i> Par procuration ({{ $mv->proxy_name }} - {{ $mv->proxy_cin }})
                                         @if($mv->proxy_document_path)
-                                            <a href="{{ Storage::url($mv->proxy_document_path) }}" target="_blank" class="ml-1"><i class="fas fa-download"></i> Scan</a>
+                                            <a href="{{ route('scans.show', ['path' => $mv->proxy_document_path]) }}" target="_blank" class="ml-1"><i class="fas fa-download"></i> Fichier joint</a>
                                         @endif
                                     </small>
                                 @endif
@@ -138,7 +138,7 @@
                             <input type="text" name="proxy_cin" class="form-control" placeholder="Ex: AB123456">
                         </div>
                         <div class="form-group mb-0">
-                            <label>Scan de la procuration (صورة الوكالة)</label>
+                            <label>Importer la procuration depuis l'appareil (صورة الوكالة)</label>
                             <input type="file" name="proxy_document" class="form-control-file" accept=".pdf,.jpg,.jpeg,.png">
                         </div>
                     </div>

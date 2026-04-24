@@ -19,9 +19,9 @@ class ImportController extends Controller
             'file' => 'required|mimes:xlsx,xls,csv|max:10240',
         ]);
 
-        Excel::import(new TraineesImport, $request->file('file'));
+        Excel::queueImport(new TraineesImport, $request->file('file'));
 
         return redirect()->route('trainees.index')
-            ->with('success', 'Importation réussie!');
+            ->with('success', 'L\'importation a été lancée en arrière-plan ! Vous pouvez continuer à utiliser l\'application.');
     }
 }

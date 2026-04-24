@@ -25,6 +25,9 @@
         <form method="GET" action="{{ route('diplomes.prets') }}">
             <div class="row">
                 <div class="col-md-3">
+                    <input type="text" name="search" class="form-control" placeholder="Recherche (CIN, Nom...)" value="{{ request('search') }}">
+                </div>
+                <div class="col-md-2">
                     <select name="filiere_id" class="form-control select2">
                         <option value="">— Toutes les filières —</option>
                         @foreach($filieres as $f)
@@ -34,7 +37,7 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <select name="group" class="form-control">
                         <option value="">— Tous les groupes —</option>
                         @foreach($groups as $g)
@@ -42,7 +45,7 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <select name="graduation_year" class="form-control">
                         <option value="">— Toutes les années —</option>
                         @foreach($years as $y)
@@ -220,6 +223,9 @@
                                 <i class="fas fa-sync"></i> Changer
                             </button>
                         </div>
+                        <hr class="mt-3 mb-3 border-secondary">
+                        <label class="font-weight-bold mb-2">📁 Ou importer un fichier (Scanner)</label>
+                        <input type="file" id="signatureFile" class="form-control" accept="image/*">
                     </div>
                     <div class="col-md-6 text-center">
                         <label class="font-weight-bold mb-2">✅ Aperçu</label>
@@ -262,7 +268,7 @@
 </div>
 
 {{-- MODAL PROMOUVOIR UN DIPLÔMÉ --}}
-<div class="modal fade" id="modalPromouvoir" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="modalPromouvoir" aria-hidden="true">
     <div class="modal-dialog modal-md">
         <div class="modal-content">
             <div class="modal-header bg-success text-white">
@@ -309,11 +315,6 @@
 <script>
 $('.select2').select2();
 $('#selectTraineePromote').select2({ dropdownParent: $('#modalPromouvoir'), width: '100%' });
-$('#prets-table').DataTable({
-    language: { url: '//cdn.datatables.net/plug-ins/1.10.19/i18n/French.json' },
-    paging: false,
-    scrollX: true
-});
 
 // ── Modal : Promouvoir un diplômé ──
 $('#selectTraineePromote').on('change', function () {
@@ -396,6 +397,7 @@ $(document).on('click', '.btn-scan-signature', function () {
 
 $('#signatureModal').on('hidden.bs.modal', () => {
     if (stream) stream.getTracks().forEach(t => t.stop());
+    $('#signatureFile').val('');
 });
 
 $('#btnSwitchCamera').on('click', () => {
@@ -412,6 +414,13 @@ $('#btnCapture').on('click', () => {
     $('#btnRetake, #btnSaveSignature').show();
 });
 
+$('#signatureFile').on('change', function(e) {
+    if (this.files && this.files[0]) {
+        $('#btnSaveSignature').show();
+        $('#noCapture').html('<i class="fas fa-file-image fa-2x"></i><br>Fichier sélectionné');
+    }
+});
+
 $('#btnRetake').on('click', () => {
     canvas.style.display = 'none';
     $('#noCapture').show();
@@ -419,11 +428,30 @@ $('#btnRetake').on('click', () => {
 });
 
 $('#btnSaveSignature').on('click', function () {
-    const $btn = $(this).prop('disabled', true)
-                        .html('<i class="fas fa-spinner fa-spin"></i>');
-    $.post(`/diplomes-prets/${traineeId}/signature`, {
-        _token: '{{ csrf_token() }}',
-        signature: canvas.toDataURL('image/png')
+    const fileInput = document.getElementById('signatureFile');
+    const hasFile = fileInput.files && fileInput.files.length > 0;
+    
+    if (!hasFile && canvas.style.display === 'none') {
+        toastr.error('Veuillez capturer ou uploader une signature.');
+        return;
+    }
+
+    const $btn = $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
+    const formData = new FormData();
+    formData.append('_token', '{{ csrf_token() }}');
+    
+    if (hasFile) {
+        formData.append('signature_file', fileInput.files[0]);
+    } else {
+        formData.append('signature', canvas.toDataURL('image/png'));
+    }
+
+    $.ajax({
+        url: `/diplomes-prets/${traineeId}/signature`,
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false
     })
     .done(res => {
         if (res.success) {

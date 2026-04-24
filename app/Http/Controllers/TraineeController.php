@@ -161,8 +161,8 @@ class TraineeController extends Controller
         ]);
 
         try {
-            Excel::import(new TraineesImport, $request->file('file'));
-            return back()->with('success', 'Import réussi ✅');
+            Excel::queueImport(new TraineesImport, $request->file('file'));
+            return back()->with('success', 'L\'importation a été lancée en arrière-plan !');
         } catch (\Exception $e) {
             return back()->with('error', 'Erreur import : ' . $e->getMessage());
         }
@@ -172,7 +172,11 @@ class TraineeController extends Controller
     {
         $trainee->load(['filiere.secteur', 'documents.movements.user']);
 
-        $pdf = Pdf::loadView('reports.trainee', compact('trainee'))
+        // Reshape Arabic text for correct DomPDF rendering
+        $ar = new \ArPHP\I18N\Arabic();
+        $arabicHeader = $ar->utf8Glyphs('مكتب التكوين المهني وإنعاش الشغل');
+
+        $pdf = Pdf::loadView('reports.trainee', compact('trainee', 'arabicHeader'))
                   ->setPaper('a4', 'portrait');
 
         $filename = sprintf('rapport_%s_%s.pdf', $trainee->cin, now()->format('Ymd'));

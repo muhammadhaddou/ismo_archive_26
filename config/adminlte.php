@@ -14,8 +14,8 @@ return [
     ],
 
     'logo' => '<b>ISMO</b> Archive',
-    'logo_img' => 'vendor/adminlte/dist/img/AdminLTELogo.png',
-    'logo_img_class' => 'brand-image img-circle elevation-3',
+    'logo_img' => 'images/ofppt_logo.png',
+    'logo_img_class' => 'brand-image elevation-3',
     'logo_img_xl' => null,
     'logo_img_xl_class' => 'brand-image-xs',
     'logo_img_alt' => 'ISMO Logo',
@@ -23,7 +23,7 @@ return [
     'auth_logo' => [
         'enabled' => false,
         'img' => [
-            'path' => 'vendor/adminlte/dist/img/AdminLTELogo.png',
+            'path' => 'images/ofppt_logo.png',
             'alt' => 'ISMO Logo',
             'class' => '',
             'width' => 50,
@@ -35,11 +35,11 @@ return [
         'enabled' => true,
         'mode' => 'fullscreen',
         'img' => [
-            'path' => 'vendor/adminlte/dist/img/AdminLTELogo.png',
-            'alt' => 'ISMO Preloader',
+            'path' => 'images/ofppt_logo.png',
+            'alt' => 'OFPPT Preloader',
             'effect' => 'animation__shake',
-            'width' => 60,
-            'height' => 60,
+            'width' => 150,
+            'height' => '',
         ],
     ],
 
@@ -53,9 +53,9 @@ return [
     'layout_fixed_sidebar' => true,
     'layout_fixed_navbar' => true,
 
-    'classes_sidebar' => 'sidebar-dark-primary elevation-4',
-    'classes_topnav' => 'navbar-white navbar-light',
-    'classes_topnav_container' => 'container',
+    'classes_sidebar' => 'sidebar-light-primary elevation-2',
+    'classes_topnav' => 'navbar-white navbar-light border-bottom-0',
+    'classes_topnav_container' => 'container-fluid',
 
     'sidebar_mini' => 'lg',
 
@@ -68,6 +68,7 @@ return [
 
         // 🔍 Navbar
         ['type' => 'navbar-search', 'text' => 'Rechercher', 'topnav_right' => true],
+        ['type' => 'darkmode-widget', 'topnav_right' => true],
         ['type' => 'fullscreen-widget', 'topnav_right' => true],
 
         // 📊 Dashboard
@@ -136,8 +137,6 @@ return [
             'text' => 'Paramètres',
             'icon' => 'fas fa-fw fa-cogs',
             'submenu' => [
-                ['text' => 'Secteurs', 'route' => 'secteurs.index'],
-                ['text' => 'Filières', 'route' => 'filieres.index'],
                 ['text' => 'Horaires de retrait', 'route' => 'admin.settings.availability'],
             ],
         ],

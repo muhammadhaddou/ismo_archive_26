@@ -66,7 +66,7 @@ class DocumentController extends Controller
 
         $scanPath = null;
         if ($request->hasFile('scan_file')) {
-            $scanPath = $request->file('scan_file')->store('documents_scans', 'public');
+            $scanPath = $request->file('scan_file')->store('documents_scans', 'local');
         }
 
         $document = Document::create([
@@ -136,7 +136,7 @@ class DocumentController extends Controller
 
         $proxyPath = null;
         if ($request->hasFile('proxy_document')) {
-            $proxyPath = $request->file('proxy_document')->store('procurations', 'public');
+            $proxyPath = $request->file('proxy_document')->store('procurations', 'local');
         }
 
         Movement::create([
@@ -180,10 +180,10 @@ class DocumentController extends Controller
 
         // Delete old scan if exists
         if ($document->scan_file) {
-            Storage::disk('public')->delete($document->scan_file);
+            Storage::disk('local')->delete($document->scan_file);
         }
 
-        $scanPath = $request->file('scan_file')->store('documents_scans', 'public');
+        $scanPath = $request->file('scan_file')->store('documents_scans', 'local');
         $document->update(['scan_file' => $scanPath]);
 
         return redirect()->route('trainees.show', $document->trainee_id)

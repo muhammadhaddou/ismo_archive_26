@@ -205,7 +205,7 @@
                     <div class="form-group">
                         <label class="font-weight-bold">
                             <i class="fas fa-file-upload mr-1 text-secondary"></i>
-                            Scan / Fichier joint
+                            Scan / Importer depuis l'appareil
                             <small class="text-muted font-weight-normal">(PDF, JPG, PNG — max 5MB)</small>
                         </label>
                         <input type="file" name="scan_file"

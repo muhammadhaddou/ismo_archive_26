@@ -96,6 +96,8 @@
         <meta name="msapplication-TileImage" content="{{ asset('favicons/ms-icon-144x144.png') }}">
     @endif
 
+    {{-- Phoenix Custom Global Theme --}}
+    <link rel="stylesheet" href="{{ asset('css/phoenix-theme.css') }}">
 </head>
 
 <body class="@yield('classes_body')" @yield('body_data')>

@@ -234,7 +234,7 @@
                                         <i class="fas fa-eye"></i> Voir
                                     </a>
                                     @if($doc->scan_file)
-                                    <a href="{{ asset('storage/' . $doc->scan_file) }}"
+                                    <a href="{{ route('scans.show', ['path' => $doc->scan_file]) }}"
                                        target="_blank"
                                        class="btn btn-xs btn-outline-success"
                                        style="font-size:11px">
@@ -339,7 +339,7 @@
                     <div class="alert alert-info py-2">
                         <i class="fas fa-info-circle"></i> Un scan existe déjà. L'upload remplacera l'ancien fichier.
                         <br>
-                        <a href="{{ asset('storage/' . $doc->scan_file) }}" target="_blank" class="btn btn-sm btn-outline-info mt-1">
+                        <a href="{{ route('scans.show', ['path' => $doc->scan_file]) }}" target="_blank" class="btn btn-sm btn-outline-info mt-1">
                             <i class="fas fa-eye"></i> Voir scan actuel
                         </a>
                     </div>

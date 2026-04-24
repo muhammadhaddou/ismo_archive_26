@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
+use Illuminate\Pagination\Paginator;
 use App\Models\Document;
 
 class AppServiceProvider extends ServiceProvider
@@ -16,6 +17,9 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Use Bootstrap 4 for Pagination (fixes giant SVG arrows)
+        Paginator::useBootstrapFour();
+
         // صلاحية إدارة المستخدمين
         Gate::define('manage-users', function ($user) {
             return $user->hasRole('admin');

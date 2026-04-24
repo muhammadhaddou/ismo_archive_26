@@ -19,8 +19,8 @@
                     <div class="form-group border p-2 rounded">
                         <label>CIN Stagiaire *</label>
                         <input type="text" name="cin" class="form-control mb-2" value="{{ old('cin',$trainee->cin) }}" placeholder="Numéro CIN">
-                        <label class="small text-muted mb-0"><i class="fas fa-file-upload"></i> Scan CIN Stagiaire (PDF/Image)</label>
-                        @if($trainee->cin_scan) <a href="{{ asset('storage/'.$trainee->cin_scan) }}" target="_blank" class="badge badge-success ml-2">Voir scan actuel</a> @endif
+                        <label class="small text-muted mb-0"><i class="fas fa-file-upload"></i> Importer CIN Stagiaire depuis l'appareil (PDF/Image)</label>
+                        @if($trainee->cin_scan) <a href="{{ asset('storage/'.$trainee->cin_scan) }}" target="_blank" class="badge badge-success ml-2">Voir fichier actuel</a> @endif
                         <input type="file" name="cin_scan" class="form-control-file mt-1">
                     </div>
                 </div>
@@ -31,8 +31,8 @@
                         <input type="text" name="cin_pere" class="form-control mb-2"
                                value="{{ old('cin_pere', $trainee->cin_pere) }}"
                                placeholder="CIN du père">
-                        <label class="small text-muted mb-0"><i class="fas fa-file-upload"></i> Scan CIN Père (PDF/Image)</label>
-                        @if($trainee->cin_pere_scan) <a href="{{ asset('storage/'.$trainee->cin_pere_scan) }}" target="_blank" class="badge badge-success ml-2">Voir scan actuel</a> @endif
+                        <label class="small text-muted mb-0"><i class="fas fa-file-upload"></i> Importer CIN Père depuis l'appareil (PDF/Image)</label>
+                        @if($trainee->cin_pere_scan) <a href="{{ asset('storage/'.$trainee->cin_pere_scan) }}" target="_blank" class="badge badge-success ml-2">Voir fichier actuel</a> @endif
                         <input type="file" name="cin_pere_scan" class="form-control-file mt-1">
                     </div>
                 </div>
@@ -43,8 +43,8 @@
                         <input type="text" name="cin_mere" class="form-control mb-2"
                                value="{{ old('cin_mere', $trainee->cin_mere) }}"
                                placeholder="CIN de la mère">
-                        <label class="small text-muted mb-0"><i class="fas fa-file-upload"></i> Scan CIN Mère (PDF/Image)</label>
-                        @if($trainee->cin_mere_scan) <a href="{{ asset('storage/'.$trainee->cin_mere_scan) }}" target="_blank" class="badge badge-success ml-2">Voir scan actuel</a> @endif
+                        <label class="small text-muted mb-0"><i class="fas fa-file-upload"></i> Importer CIN Mère depuis l'appareil (PDF/Image)</label>
+                        @if($trainee->cin_mere_scan) <a href="{{ asset('storage/'.$trainee->cin_mere_scan) }}" target="_blank" class="badge badge-success ml-2">Voir fichier actuel</a> @endif
                         <input type="file" name="cin_mere_scan" class="form-control-file mt-1">
                     </div>
                 </div>

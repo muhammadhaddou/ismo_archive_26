@@ -19,7 +19,7 @@
                         <label>CIN Stagiaire *</label>
                         <input type="text" name="cin" class="form-control mb-2 @error('cin') is-invalid @enderror" value="{{ old('cin') }}" placeholder="Numéro CIN">
                         @error('cin')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        <label class="small text-muted mb-0"><i class="fas fa-file-upload"></i> Scan CIN Stagiaire (PDF/Image)</label>
+                        <label class="small text-muted mb-0"><i class="fas fa-file-upload"></i> Importer CIN Stagiaire depuis l'appareil (PDF/Image)</label>
                         <input type="file" name="cin_scan" class="form-control-file @error('cin_scan') is-invalid @enderror">
                         @error('cin_scan')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
@@ -30,7 +30,7 @@
                         <label>CIN Père</label>
                         <input type="text" name="cin_pere" class="form-control mb-2 @error('cin_pere') is-invalid @enderror" value="{{ old('cin_pere') }}" placeholder="Numéro CIN du père">
                         @error('cin_pere')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        <label class="small text-muted mb-0"><i class="fas fa-file-upload"></i> Scan CIN Père (PDF/Image)</label>
+                        <label class="small text-muted mb-0"><i class="fas fa-file-upload"></i> Importer CIN Père depuis l'appareil (PDF/Image)</label>
                         <input type="file" name="cin_pere_scan" class="form-control-file @error('cin_pere_scan') is-invalid @enderror">
                         @error('cin_pere_scan')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
@@ -41,7 +41,7 @@
                         <label>CIN Mère</label>
                         <input type="text" name="cin_mere" class="form-control mb-2 @error('cin_mere') is-invalid @enderror" value="{{ old('cin_mere') }}" placeholder="Numéro CIN de la mère">
                         @error('cin_mere')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        <label class="small text-muted mb-0"><i class="fas fa-file-upload"></i> Scan CIN Mère (PDF/Image)</label>
+                        <label class="small text-muted mb-0"><i class="fas fa-file-upload"></i> Importer CIN Mère depuis l'appareil (PDF/Image)</label>
                         <input type="file" name="cin_mere_scan" class="form-control-file @error('cin_mere_scan') is-invalid @enderror">
                         @error('cin_mere_scan')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>

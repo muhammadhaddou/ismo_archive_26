@@ -1,4 +1,4 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 @php $isBac = old('type', request('type')) === 'Bac'; @endphp
 @section('title', $isBac ? 'Retrait Baccalauréat' : 'Ajouter document')
 @section('content_header')
@@ -16,9 +16,9 @@
     <div class="card-header {{ $isBac ? 'bg-warning' : 'bg-primary' }} text-white">
         <h3 class="card-title">
             @if($isBac)
-                <i class="fas fa-graduation-cap mr-2"></i> Retrait de Baccalauréat
+                <i class="fas fa-graduation-cap me-2"></i> Retrait de Baccalauréat
             @else
-                <i class="fas fa-file-medical mr-2"></i> Nouveau document
+                <i class="fas fa-file-medical me-2"></i> Nouveau document
             @endif
         </h3>
     </div>
@@ -50,7 +50,7 @@
                 <div class="col-md-12 mb-3">
                     <div class="card border-primary">
                         <div class="card-header bg-primary text-white py-2">
-                            <strong><i class="fas fa-search mr-1"></i> Rechercher un Stagiaire</strong>
+                            <strong><i class="fas fa-search me-1"></i> Rechercher un Stagiaire</strong>
                         </div>
                         <div class="card-body pb-2">
                             <input type="hidden" name="trainee_id" id="trainee_id_hidden"
@@ -60,7 +60,7 @@
                                 {{-- Barre Nom --}}
                                 <div class="col-md-5">
                                     <div class="form-group mb-2">
-                                        <label class="small font-weight-bold"><i class="fas fa-user mr-1"></i> Nom / Prénom</label>
+                                        <label class="small font-weight-bold"><i class="fas fa-user me-1"></i> Nom / Prénom</label>
                                         <input type="text" id="search-nom" class="form-control"
                                                placeholder="Tapez un nom..."
                                                autocomplete="off">
@@ -69,7 +69,7 @@
                                 {{-- Barre CIN --}}
                                 <div class="col-md-5">
                                     <div class="form-group mb-2">
-                                        <label class="small font-weight-bold"><i class="fas fa-id-card mr-1"></i> CIN / CEF</label>
+                                        <label class="small font-weight-bold"><i class="fas fa-id-card me-1"></i> CIN / CEF</label>
                                         <input type="text" id="search-cin" class="form-control"
                                                placeholder="Tapez un CIN ou CEF..."
                                                autocomplete="off">
@@ -87,7 +87,7 @@
                             <div id="selected-trainee" style="display:none" class="alert alert-success py-2 mb-2">
                                 <i class="fas fa-check-circle"></i>
                                 <strong id="selected-trainee-name"></strong>
-                                <span id="selected-trainee-cin" class="ml-2 text-muted small"></span>
+                                <span id="selected-trainee-cin" class="ms-2 text-muted small"></span>
                                 <button type="button" class="close" onclick="clearSelectedTrainee()">
                                     <span>&times;</span>
                                 </button>
@@ -108,14 +108,13 @@
                 <div class="col-md-6 mb-3">
                     <div class="form-group">
                         <label class="font-weight-bold">
-                            <i class="fas fa-tag mr-1 text-info"></i>
+                            <i class="fas fa-tag me-1 text-info"></i>
                             Type <span class="text-danger">*</span>
                         </label>
                         <select name="type" id="type-select"
                                 class="form-control @error('type') is-invalid @enderror" required>
                             <option value="">-- Choisir le type --</option>
                             <option value="Bac"         {{ old('type', request('type')) == 'Bac'         ? 'selected' : '' }}>🎓 Baccalauréat</option>
-                            <option value="Diplome"     {{ old('type', request('type')) == 'Diplome'     ? 'selected' : '' }}>📜 Diplôme</option>
                             <option value="Attestation" {{ old('type', request('type')) == 'Attestation' ? 'selected' : '' }}>📋 Attestation</option>
                             <option value="Bulletin"    {{ old('type', request('type')) == 'Bulletin'    ? 'selected' : '' }}>📊 Bulletin de notes</option>
                         </select>
@@ -129,7 +128,7 @@
                 <div class="col-md-6 mb-3">
                     <div class="form-group">
                         <label class="font-weight-bold">
-                            <i class="fas fa-exchange-alt mr-1 text-warning"></i>
+                            <i class="fas fa-exchange-alt me-1 text-warning"></i>
                             Type de retrait <span class="text-danger">*</span>
                         </label>
                         <div class="row">
@@ -163,7 +162,7 @@
                 <div class="col-md-6 mb-3" id="bac-status-div" style="display:none">
                     <div class="form-group">
                         <label class="font-weight-bold">
-                            <i class="fas fa-exchange-alt mr-1 text-warning"></i>
+                            <i class="fas fa-exchange-alt me-1 text-warning"></i>
                             Type de retrait <span class="text-danger">*</span>
                         </label>
                         <select name="bac_status" class="form-control">
@@ -190,7 +189,7 @@
                 <div class="col-md-6 mb-3">
                     <div class="form-group">
                         <label class="font-weight-bold">
-                            <i class="fas fa-hashtag mr-1 text-secondary"></i>
+                            <i class="fas fa-hashtag me-1 text-secondary"></i>
                             Numéro de référence
                         </label>
                         <input type="text" name="reference_number"
@@ -204,7 +203,7 @@
                 <div class="col-md-6 mb-3">
                     <div class="form-group">
                         <label class="font-weight-bold">
-                            <i class="fas fa-file-upload mr-1 text-secondary"></i>
+                            <i class="fas fa-file-upload me-1 text-secondary"></i>
                             Scan / Importer depuis l'appareil
                             <small class="text-muted font-weight-normal">(PDF, JPG, PNG — max 5MB)</small>
                         </label>
@@ -307,9 +306,9 @@ function searchTrainees() {
             item.className = 'list-group-item list-group-item-action py-2';
             item.innerHTML =
                 '<strong>' + t.nom + '</strong>' +
-                '<span class="ml-2 badge badge-secondary">' + t.cin + '</span>' +
-                (t.cef ? '<span class="ml-1 badge badge-info">CEF: ' + t.cef + '</span>' : '') +
-                (t.filiere ? '<span class="ml-1 text-muted small"> | ' + t.filiere + '</span>' : '');
+                '<span class="ms-2 badge bg-secondary">' + t.cin + '</span>' +
+                (t.cef ? '<span class="ms-1 badge bg-info">CEF: ' + t.cef + '</span>' : '') +
+                (t.filiere ? '<span class="ms-1 text-muted small"> | ' + t.filiere + '</span>' : '');
             item.onclick = function() { selectTrainee(t); };
             container.appendChild(item);
         });

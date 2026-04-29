@@ -1,4 +1,4 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 @section('title', 'Stats — ' . $filiere->nom_filiere)
 
 @section('content_header')
@@ -16,7 +16,7 @@
                class="btn btn-primary">
                 <i class="fas fa-users"></i> Voir les stagiaires
             </a>
-            <a href="{{ route('filieres.index') }}" class="btn btn-secondary ml-2">
+            <a href="{{ route('filieres.index') }}" class="btn btn-secondary ms-2">
                 <i class="fas fa-arrow-left"></i> Retour
             </a>
         </div>
@@ -124,7 +124,7 @@
                             <td>{{ $g->total }}</td>
                             <td>{{ $g->en_formation }}</td>
                             <td>
-                                <span class="badge badge-success">{{ $g->diplomes }}</span>
+                                <span class="badge bg-success">{{ $g->diplomes }}</span>
                             </td>
                             <td>
                                 @php $pct = $g->total > 0 ? round($g->diplomes / $g->total * 100) : 0 @endphp
@@ -150,7 +150,7 @@
                 <h3 class="card-title">
                     <i class="fas fa-exclamation-triangle"></i>
                     Bac — Retard de retour
-                    <span class="badge badge-danger ml-2">{{ $bac_retard->count() }}</span>
+                    <span class="badge bg-danger ms-2">{{ $bac_retard->count() }}</span>
                 </h3>
             </div>
             <div class="card-body p-0">
@@ -181,7 +181,7 @@
                                 @endif
                             </td>
                             <td>
-                                <span class="badge badge-danger">{{ $overdue }}</span>
+                                <span class="badge bg-danger">{{ $overdue }}</span>
                             </td>
                             <td>
                                 <a href="{{ route('documents.show', $doc) }}"
@@ -231,15 +231,15 @@
                     <td>{{ $t->group }}</td>
                     <td>
                         @if($t->statut == 'diplome')
-                            <span class="badge badge-success">Diplômé</span>
+                            <span class="badge bg-success">Diplômé</span>
                         @elseif($t->statut == 'abandon')
-                            <span class="badge badge-danger">Abandon</span>
+                            <span class="badge bg-danger">Abandon</span>
                         @else
-                            <span class="badge badge-info">En formation</span>
+                            <span class="badge bg-info">En formation</span>
                         @endif
                     </td>
                     <td>
-                        <span class="badge badge-primary">{{ $t->documents->count() }} doc(s)</span>
+                        <span class="badge bg-primary">{{ $t->documents->count() }} doc(s)</span>
                     </td>
                     <td>
                         <a href="{{ route('trainees.show', $t) }}"

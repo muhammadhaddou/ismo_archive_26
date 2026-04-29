@@ -1,4 +1,4 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
 @section('title', 'Boîte de réception - Demandes')
 
@@ -34,23 +34,23 @@
                         <td>{{ $req->trainee->filiere->code_filiere ?? 'N/A' }}</td>
                         <td>
                             @if($req->document_type == 'Bac')
-                                <span class="badge badge-warning"><i class="fas fa-graduation-cap"></i> Bac</span>
+                                <span class="badge bg-warning"><i class="fas fa-graduation-cap"></i> Bac</span>
                             @elseif($req->document_type == 'Diplome')
-                                <span class="badge badge-info"><i class="fas fa-scroll"></i> Diplôme</span>
+                                <span class="badge bg-info"><i class="fas fa-scroll"></i> Diplôme</span>
                             @else
-                                <span class="badge badge-secondary">{{ $req->document_type }}</span>
+                                <span class="badge bg-secondary">{{ $req->document_type }}</span>
                             @endif
                         </td>
                         <td>
                             @if($req->status == 'en_attente')
-                                <span class="badge badge-warning text-uppercase">En attente</span>
+                                <span class="badge bg-warning text-uppercase">En attente</span>
                             @elseif($req->status == 'planifie')
-                                <span class="badge badge-info text-uppercase">Rdv fixé</span><br>
+                                <span class="badge bg-info text-uppercase">Rdv fixé</span><br>
                                 <small class="text-success"><i class="far fa-calendar-alt"></i> {{ $req->appointment_date ? $req->appointment_date->format('d/m/Y H:i') : '' }}</small>
                             @elseif($req->status == 'termine')
-                                <span class="badge badge-success text-uppercase">Terminé</span>
+                                <span class="badge bg-success text-uppercase">Terminé</span>
                             @elseif($req->status == 'rejete')
-                                <span class="badge badge-danger text-uppercase">Rejeté</span>
+                                <span class="badge bg-danger text-uppercase">Rejeté</span>
                             @endif
                         </td>
                         <td>
@@ -84,7 +84,7 @@
                                 <div class="modal-dialog" role="document">
                                     <form action="{{ route('admin.requests.schedule', $req->id) }}" method="POST">
                                         @csrf
-                                        <div class="modal-content text-left font-weight-normal">
+                                        <div class="modal-content text-start font-weight-normal">
                                             <div class="modal-header bg-primary">
                                                 <h5 class="modal-title">Fixer un Rendez-vous de retrait</h5>
                                                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -112,7 +112,7 @@
                                 <div class="modal-dialog" role="document">
                                     <form action="{{ route('admin.requests.reject', $req->id) }}" method="POST">
                                         @csrf
-                                        <div class="modal-content text-left font-weight-normal">
+                                        <div class="modal-content text-start font-weight-normal">
                                             <div class="modal-header bg-danger">
                                                 <h5 class="modal-title">Rejeter la demande</h5>
                                                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>

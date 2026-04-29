@@ -1,4 +1,4 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 @section('title', 'Diplômes prêts')
 @section('content_header')
     <h1><i class="fas fa-check-circle"></i> Diplômes prêts à remettre</h1>

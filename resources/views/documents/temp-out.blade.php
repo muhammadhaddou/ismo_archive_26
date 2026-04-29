@@ -1,10 +1,10 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 @section('title', 'Retraits temporaires — Bac')
 
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <h1><i class="fas fa-clock"></i> Bac — Retraits temporaires</h1>
-        <span class="badge badge-warning" style="font-size:14px">
+        <span class="badge bg-warning" style="font-size:14px">
             {{ $documents->total() }} en cours
         </span>
     </div>
@@ -230,23 +230,23 @@
 
                     <td>
                         @if($isAlerte)
-                            <span class="badge badge-danger">
+                            <span class="badge bg-danger">
                                 <i class="fas fa-exclamation-triangle"></i> Alerte: {{ $hoursLeft }}h restantes
                             </span>
                         @elseif($hoursLeft !== null)
                             @if($hoursLeft <= 24)
-                                <span class="badge badge-warning">
+                                <span class="badge bg-warning">
                                     {{ $hoursLeft }}h restantes
                                 </span>
 
                             @else
-                                <span class="badge badge-success">
+                                <span class="badge bg-success">
                                     {{ $hoursLeft }}h restantes
                                 </span>
                             @endif
 
                         @else
-                            <span class="badge badge-secondary">—</span>
+                            <span class="badge bg-secondary">—</span>
                         @endif
                     </td>
 
@@ -260,7 +260,7 @@
                             <i class="fas fa-qrcode"></i> Scanner
                         </button>
                         <div id="scan-result-{{ $doc->id }}" class="mt-1" style="display:none">
-                            <span class="badge scan-badge-{{ $doc->id }} badge-success">
+                            <span class="badge scan-badge-{{ $doc->id }} bg-success">
                                 <i class="fas fa-check-circle"></i>
                                 <span class="scan-text-{{ $doc->id }}"></span>
                             </span>
@@ -307,7 +307,7 @@
                 <h5 class="modal-title">
                     <i class="fas fa-qrcode"></i>
                     Scanner CIN / QR Code
-                    <small class="ml-2 text-dark font-weight-normal" id="modal-scan-cin-label"></small>
+                    <small class="ms-2 text-dark font-weight-normal" id="modal-scan-cin-label"></small>
                 </h5>
                 <button type="button" class="close" data-dismiss="modal">
                     <span>&times;</span>
@@ -357,7 +357,7 @@
                     <div id="modal-scan-alert" class="alert mb-0 py-2">
                         <i class="fas fa-check-circle"></i>
                         <strong>Code détecté :</strong>
-                        <span id="modal-scan-text" class="ml-1 font-weight-bold"></span>
+                        <span id="modal-scan-text" class="ms-1 font-weight-bold"></span>
                     </div>
                 </div>
             </div>
@@ -483,8 +483,8 @@
             // Mettre à jour le badge dans la ligne du tableau
             var badge = $('.scan-badge-' + currentDocId);
             var text  = $('.scan-text-'  + currentDocId);
-            badge.removeClass('badge-success badge-warning')
-                 .addClass(match ? 'badge-success' : 'badge-warning');
+            badge.removeClass('bg-success bg-warning')
+                 .addClass(match ? 'bg-success' : 'bg-warning');
             text.text(match ? '✅ ' + data : '⚠️ ' + data);
             $('#scan-result-' + currentDocId).show();
         }

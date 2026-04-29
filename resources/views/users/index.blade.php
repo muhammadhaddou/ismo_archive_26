@@ -1,4 +1,4 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 @section('title', 'Utilisateurs')
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
@@ -28,14 +28,14 @@
                     <td>{{ $user->email }}</td>
                     <td>
                         @foreach($user->roles as $role)
-                            <span class="badge badge-primary">{{ $role->name }}</span>
+                            <span class="badge bg-primary">{{ $role->name }}</span>
                         @endforeach
                     </td>
                     <td>
                         @if($user->is_active)
-                            <span class="badge badge-success">Actif</span>
+                            <span class="badge bg-success">Actif</span>
                         @else
-                            <span class="badge badge-danger">Inactif</span>
+                            <span class="badge bg-danger">Inactif</span>
                         @endif
                     </td>
                     <td>

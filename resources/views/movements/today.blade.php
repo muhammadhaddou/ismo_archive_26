@@ -1,4 +1,4 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 @section('title', "Retraits d'aujourd'hui")
 @section('content_header')
     <h1><i class="fas fa-calendar-day"></i> Retraits du {{ now()->format('d/m/Y') }}</h1>
@@ -22,14 +22,14 @@
                 <tr>
                     <td>{{ $mv->document->trainee->last_name }} {{ $mv->document->trainee->first_name }}</td>
                     <td>{{ $mv->document->trainee->cin }}</td>
-                    <td><span class="badge badge-primary">{{ $mv->document->type }}</span></td>
+                    <td><span class="badge bg-primary">{{ $mv->document->type }}</span></td>
                     <td>
                         @if($mv->action_type == 'Sortie')
-                            <span class="badge badge-warning">Sortie</span>
+                            <span class="badge bg-warning">Sortie</span>
                         @elseif($mv->action_type == 'Retour')
-                            <span class="badge badge-success">Retour</span>
+                            <span class="badge bg-success">Retour</span>
                         @else
-                            <span class="badge badge-info">Saisie</span>
+                            <span class="badge bg-info">Saisie</span>
                         @endif
                     </td>
                     <td>{{ $mv->user->name }}</td>

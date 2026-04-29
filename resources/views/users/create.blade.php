@@ -1,4 +1,4 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 @section('title', 'Ajouter utilisateur')
 @section('content_header')
     <h1><i class="fas fa-user-plus"></i> Ajouter un utilisateur</h1>

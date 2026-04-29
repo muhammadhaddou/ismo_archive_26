@@ -7,6 +7,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Pagination\Paginator;
 use App\Models\Document;
+use Illuminate\Support\Facades\Auth;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Badge عدد الـ Temp-Out المنتهية
         View::composer('*', function ($view) {
-            if (auth()->check()) {
+            if (Auth::check()) {
 
                 $expiredBacCount = Document::where('type', 'Bac')
                     ->where('status', 'Temp_Out')

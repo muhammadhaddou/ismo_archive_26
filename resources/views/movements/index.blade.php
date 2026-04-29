@@ -1,4 +1,4 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 @section('title', 'Historique des mouvements')
 @section('content_header')
     <h1><i class="fas fa-exchange-alt"></i> Historique des mouvements</h1>
@@ -21,14 +21,14 @@
                 @foreach($movements as $mv)
                 <tr>
                     <td>{{ $mv->document->trainee->last_name }} {{ $mv->document->trainee->first_name }}</td>
-                    <td><span class="badge badge-primary">{{ $mv->document->type }}</span></td>
+                    <td><span class="badge bg-primary">{{ $mv->document->type }}</span></td>
                     <td>
                         @if($mv->action_type == 'Saisie')
-                            <span class="badge badge-info">Saisie</span>
+                            <span class="badge bg-info">Saisie</span>
                         @elseif($mv->action_type == 'Sortie')
-                            <span class="badge badge-warning">Sortie</span>
+                            <span class="badge bg-warning">Sortie</span>
                         @else
-                            <span class="badge badge-success">Retour</span>
+                            <span class="badge bg-success">Retour</span>
                         @endif
                     </td>
                     <td>{{ $mv->user->name }}</td>

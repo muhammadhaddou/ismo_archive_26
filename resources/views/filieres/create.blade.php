@@ -1,4 +1,4 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 @section('title', 'Ajouter filière')
 @section('content_header')
     <h1><i class="fas fa-plus"></i> Ajouter une filière</h1>

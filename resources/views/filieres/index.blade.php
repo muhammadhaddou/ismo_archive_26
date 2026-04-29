@@ -1,4 +1,4 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
 @section('title', 'Filières')
 
@@ -46,7 +46,7 @@
                 @foreach($filieres as $filiere)
                 <tr>
                     <td>
-                        <span class="badge badge-primary">
+                        <span class="badge bg-primary">
                             {{ $filiere->code_filiere }}
                         </span>
                     </td>
@@ -56,13 +56,13 @@
                     <td>{{ $filiere->secteur->nom_secteur }}</td>
 
                     <td>
-                        <span class="badge badge-info">
+                        <span class="badge bg-info">
                             {{ $filiere->niveau }}
                         </span>
                     </td>
 
                     <td>
-                        <span class="badge badge-success">
+                        <span class="badge bg-success">
                             {{ $filiere->trainees_count }}
                         </span>
                     </td>
@@ -70,13 +70,13 @@
                     <td class="text-center">
                         {{-- Statistiques --}}
                         <a href="{{ route('filieres.stats', $filiere) }}"
-                           class="btn btn-sm btn-info mr-1">
+                           class="btn btn-sm btn-info me-1">
                             <i class="fas fa-chart-bar"></i>
                         </a>
 
                         {{-- Modifier --}}
                         <a href="{{ route('filieres.edit', $filiere) }}"
-                           class="btn btn-sm btn-warning mr-1">
+                           class="btn btn-sm btn-warning me-1">
                             <i class="fas fa-edit"></i>
                         </a>
 

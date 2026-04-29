@@ -1,4 +1,4 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
 @section('title', 'Fiche stagiaire')
 
@@ -11,20 +11,20 @@
         <div>
             @if(!$trainee->validation)
                 <a href="{{ route('validations.create', $trainee) }}"
-                   class="btn btn-success mr-2">
+                   class="btn btn-success me-2">
                     <i class="fas fa-check-double"></i> Validation finale
                 </a>
             @else
                 <a href="{{ route('validations.show', $trainee) }}"
-                   class="btn btn-success mr-2">
+                   class="btn btn-success me-2">
                     <i class="fas fa-check-circle"></i> Voir validation
-                    <span class="badge badge-light">
+                    <span class="badge bg-light">
                         {{ $trainee->validation->date_validation->format('d/m/Y') }}
                     </span>
                 </a>
             @endif
             <a href="{{ route('trainees.edit', $trainee) }}"
-               class="btn btn-warning mr-2">
+               class="btn btn-warning me-2">
                 <i class="fas fa-edit"></i> Modifier
             </a>
             <a href="{{ route('trainees.index') }}" class="btn btn-secondary">
@@ -70,11 +70,11 @@
                 </p>
 
                 @if($trainee->validation)
-                    <span class="badge badge-success badge-lg p-2">
+                    <span class="badge bg-success badge-lg p-2">
                         <i class="fas fa-check-double"></i> VALIDÉ
                     </span>
                 @else
-                    <span class="badge badge-secondary badge-lg p-2">
+                    <span class="badge bg-secondary badge-lg p-2">
                         <i class="fas fa-clock"></i> En cours
                     </span>
                 @endif
@@ -82,15 +82,15 @@
             <div class="card-footer p-0">
                 <table class="table table-sm mb-0">
                     <tr>
-                        <th class="pl-3">CIN</th>
+                        <th class="ps-3">CIN</th>
                         <td>{{ $trainee->cin }}</td>
                     </tr>
                     <tr>
-                        <th class="pl-3">CEF</th>
+                        <th class="ps-3">CEF</th>
                         <td>{{ $trainee->cef ?? '—' }}</td>
                     </tr>
                     <tr>
-                        <th class="pl-3">Date naissance</th>
+                        <th class="ps-3">Date naissance</th>
                         <td>
                             {{ $trainee->date_naissance
                                 ? \Carbon\Carbon::parse($trainee->date_naissance)->format('d/m/Y')
@@ -98,7 +98,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <th class="pl-3">Téléphone</th>
+                        <th class="ps-3">Téléphone</th>
                         <td>
                             @if($trainee->phone)
                                 <a href="tel:{{ $trainee->phone }}">{{ $trainee->phone }}</a>
@@ -108,11 +108,11 @@
                         </td>
                     </tr>
                     <tr>
-                        <th class="pl-3">Groupe</th>
+                        <th class="ps-3">Groupe</th>
                         <td>{{ $trainee->group }}</td>
                     </tr>
                     <tr>
-                        <th class="pl-3">Promotion</th>
+                        <th class="ps-3">Promotion</th>
                         <td>{{ $trainee->graduation_year }}</td>
                     </tr>
                 </table>
@@ -160,7 +160,7 @@
                         @foreach($extraRows as [$key, $label, $val])
                             @continue(!filled($val))
                             <tr>
-                                <th class="pl-3 text-nowrap" style="width:40%">{{ $label }}</th>
+                                <th class="ps-3 text-nowrap" style="width:40%">{{ $label }}</th>
                                 <td>{{ $val }}</td>
                             </tr>
                         @endforeach
@@ -215,14 +215,14 @@
 
                             @if($doc)
                                 @if($doc->reference_number)
-                                    <div class="mt-2 text-left" style="font-size:12px; background: rgba(0,0,0,0.03); padding: 5px; border-radius: 4px;">
+                                    <div class="mt-2 text-start" style="font-size:12px; background: rgba(0,0,0,0.03); padding: 5px; border-radius: 4px;">
                                         <strong>Réf:</strong> {{ $doc->reference_number }}
                                         @if($doc->level_year)
                                         <br><strong>Année:</strong> {{ $doc->level_year }}
                                         @endif
                                     </div>
                                 @elseif($doc->level_year)
-                                    <div class="mt-2 text-left" style="font-size:12px; background: rgba(0,0,0,0.03); padding: 5px; border-radius: 4px;">
+                                    <div class="mt-2 text-start" style="font-size:12px; background: rgba(0,0,0,0.03); padding: 5px; border-radius: 4px;">
                                         <strong>Année:</strong> {{ $doc->level_year }}
                                     </div>
                                 @endif
@@ -287,17 +287,17 @@
                         @forelse($trainee->documents->flatMap->movements->sortByDesc('date_action') as $mv)
                         <tr>
                             <td>
-                                <span class="badge badge-primary">
+                                <span class="badge bg-primary">
                                     {{ $mv->document->type ?? '—' }}
                                 </span>
                             </td>
                             <td>
                                 @if($mv->action_type == 'Saisie')
-                                    <span class="badge badge-info">Saisie</span>
+                                    <span class="badge bg-info">Saisie</span>
                                 @elseif($mv->action_type == 'Sortie')
-                                    <span class="badge badge-warning">Sortie</span>
+                                    <span class="badge bg-warning">Sortie</span>
                                 @else
-                                    <span class="badge badge-success">Retour</span>
+                                    <span class="badge bg-success">Retour</span>
                                 @endif
                             </td>
                             <td>{{ $mv->user->name ?? '—' }}</td>
@@ -331,7 +331,7 @@
             <form action="{{ route('documents.scan', $doc) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-header bg-secondary text-white">
-                    <h5 class="modal-title"><i class="fas fa-upload mr-2"></i> Upload Scan — {{ $type }}</h5>
+                    <h5 class="modal-title"><i class="fas fa-upload me-2"></i> Upload Scan — {{ $type }}</h5>
                     <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">

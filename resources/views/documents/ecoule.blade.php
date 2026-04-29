@@ -1,10 +1,10 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 @section('title', 'Documents écoulés — Bac')
 
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <h1><i class="fas fa-exclamation-triangle text-danger"></i> Bac — Documents Écoulés (>48h)</h1>
-        <span class="badge badge-danger" style="font-size:14px">
+        <span class="badge bg-danger" style="font-size:14px">
             {{ $documents->total() }} écoulés
         </span>
     </div>
@@ -45,7 +45,7 @@
                     </select>
                 </div>
                 <div class="col-md-4 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary mr-2">
+                    <button type="submit" class="btn btn-primary me-2">
                         <i class="fas fa-filter"></i> Filtrer
                     </button>
                     <a href="{{ route('documents.bac.ecoule') }}" class="btn btn-secondary">
@@ -122,7 +122,7 @@
                         {{ $deadline ? $deadline->format('d/m/Y H:i') : '—' }}
                     </td>
                     <td>
-                        <span class="badge badge-danger">
+                        <span class="badge bg-danger">
                             <i class="fas fa-exclamation-triangle"></i> Expiré
                         </span>
                         <br>

@@ -1,4 +1,4 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
 @section('title', 'Modifier stagiaire')
 
@@ -20,7 +20,7 @@
                         <label>CIN Stagiaire *</label>
                         <input type="text" name="cin" class="form-control mb-2" value="{{ old('cin',$trainee->cin) }}" placeholder="Numéro CIN">
                         <label class="small text-muted mb-0"><i class="fas fa-file-upload"></i> Importer CIN Stagiaire depuis l'appareil (PDF/Image)</label>
-                        @if($trainee->cin_scan) <a href="{{ asset('storage/'.$trainee->cin_scan) }}" target="_blank" class="badge badge-success ml-2">Voir fichier actuel</a> @endif
+                        @if($trainee->cin_scan) <a href="{{ asset('storage/'.$trainee->cin_scan) }}" target="_blank" class="badge bg-success ms-2">Voir fichier actuel</a> @endif
                         <input type="file" name="cin_scan" class="form-control-file mt-1">
                     </div>
                 </div>
@@ -32,7 +32,7 @@
                                value="{{ old('cin_pere', $trainee->cin_pere) }}"
                                placeholder="CIN du père">
                         <label class="small text-muted mb-0"><i class="fas fa-file-upload"></i> Importer CIN Père depuis l'appareil (PDF/Image)</label>
-                        @if($trainee->cin_pere_scan) <a href="{{ asset('storage/'.$trainee->cin_pere_scan) }}" target="_blank" class="badge badge-success ml-2">Voir fichier actuel</a> @endif
+                        @if($trainee->cin_pere_scan) <a href="{{ asset('storage/'.$trainee->cin_pere_scan) }}" target="_blank" class="badge bg-success ms-2">Voir fichier actuel</a> @endif
                         <input type="file" name="cin_pere_scan" class="form-control-file mt-1">
                     </div>
                 </div>
@@ -44,7 +44,7 @@
                                value="{{ old('cin_mere', $trainee->cin_mere) }}"
                                placeholder="CIN de la mère">
                         <label class="small text-muted mb-0"><i class="fas fa-file-upload"></i> Importer CIN Mère depuis l'appareil (PDF/Image)</label>
-                        @if($trainee->cin_mere_scan) <a href="{{ asset('storage/'.$trainee->cin_mere_scan) }}" target="_blank" class="badge badge-success ml-2">Voir fichier actuel</a> @endif
+                        @if($trainee->cin_mere_scan) <a href="{{ asset('storage/'.$trainee->cin_mere_scan) }}" target="_blank" class="badge bg-success ms-2">Voir fichier actuel</a> @endif
                         <input type="file" name="cin_mere_scan" class="form-control-file mt-1">
                     </div>
                 </div>

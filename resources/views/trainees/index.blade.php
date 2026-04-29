@@ -1,4 +1,4 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
 @section('title', 'Liste des stagiaires')
 
@@ -6,7 +6,7 @@
 <div class="d-flex justify-content-between align-items-center">
     <h1><i class="fas fa-users"></i> Liste des stagiaires</h1>
     <div>
-        <a href="{{ route('trainees.import') }}" class="btn btn-success mr-2">
+        <a href="{{ route('trainees.import') }}" class="btn btn-success me-2">
             <i class="fas fa-file-excel"></i> Importer Excel
         </a>
         <a href="{{ route('trainees.create') }}" class="btn btn-primary">
@@ -27,7 +27,7 @@
 
 {{-- Filtres --}}
 <div class="card mb-3">
-    <div class="card-header bg-light">
+    <div class="card-header">
         <h3 class="card-title"><i class="fas fa-filter"></i> Filtres</h3>
     </div>
     <div class="card-body">
@@ -71,7 +71,7 @@
                     </select>
                 </div>
                 <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary mr-2" title="Filtrer">
+                    <button type="submit" class="btn btn-primary me-2" title="Filtrer">
                         <i class="fas fa-search"></i>
                     </button>
                     <a href="{{ route('trainees.index') }}" class="btn btn-secondary" title="Reset">
@@ -87,7 +87,7 @@
 <div class="card">
     <div class="card-body table-responsive">
         <table id="trainees-table" class="table table-bordered table-hover">
-            <thead class="bg-primary">
+            <thead class="bg-primary text-white">
                 <tr>
                     <th>#</th>
                     <th>CIN</th>
@@ -131,19 +131,19 @@
                     {{-- ✅ Statut Badge --}}
                     <td>
                         @if($t->statut == 'diplome')
-                            <span class="badge badge-success">
+                            <span class="badge bg-success">
                                 <i class="fas fa-graduation-cap"></i> Diplômé
                             </span>
                         @elseif($t->statut == 'abandon')
-                            <span class="badge badge-danger">
+                            <span class="badge bg-danger">
                                 <i class="fas fa-times"></i> Abandon
                             </span>
                         @elseif($t->statut == 'redoublant')
-                            <span class="badge badge-warning">
+                            <span class="badge bg-warning">
                                 <i class="fas fa-redo"></i> Redoublant
                             </span>
                         @else
-                            <span class="badge badge-info">
+                            <span class="badge bg-info">
                                 <i class="fas fa-book"></i> En formation
                             </span>
                         @endif
@@ -159,20 +159,20 @@
                             @if(isset($docs[$type]))
                                 @php $doc = $docs[$type]->first(); @endphp
                                 @if(in_array($doc->status, ['Remis','Final_Out']))
-                                    <span class="badge badge-success" title="{{ $type }}">
+                                    <span class="badge bg-success" title="{{ $type }}">
                                         <i class="fas fa-check"></i> {{ $type }}
                                     </span>
                                 @elseif($doc->status == 'Temp_Out')
-                                    <span class="badge badge-warning" title="{{ $type }}">
+                                    <span class="badge bg-warning" title="{{ $type }}">
                                         <i class="fas fa-clock"></i> {{ $type }}
                                     </span>
                                 @else
-                                    <span class="badge badge-secondary" title="{{ $type }}">
+                                    <span class="badge bg-secondary" title="{{ $type }}">
                                         <i class="fas fa-archive"></i> {{ $type }}
                                     </span>
                                 @endif
                             @else
-                                <span class="badge badge-light border" title="{{ $type }}">
+                                <span class="badge bg-light border text-secondary" title="{{ $type }}">
                                     <i class="fas fa-times text-danger"></i> {{ $type }}
                                 </span>
                             @endif

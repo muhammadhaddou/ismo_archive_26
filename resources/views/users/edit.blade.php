@@ -1,4 +1,4 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 @section('title', 'Modifier utilisateur')
 @section('content_header')
     <h1><i class="fas fa-user-edit"></i> Modifier — {{ $user->name }}</h1>

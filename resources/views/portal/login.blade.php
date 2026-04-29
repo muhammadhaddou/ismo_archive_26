@@ -275,8 +275,8 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary-custom btn-block text-white">
-                        EXPLOREZ VOTRE ESPACE <i class="fas fa-arrow-right ml-2"></i>
+                    <button type="submit" class="btn btn-primary-custom w-100 text-white">
+                        EXPLOREZ VOTRE ESPACE <i class="fas fa-arrow-right ms-2"></i>
                     </button>
                 </form>
             </div>

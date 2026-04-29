@@ -1,4 +1,4 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 @section('title', 'Documents — ' . ($type ?? 'Tous'))
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
@@ -125,7 +125,7 @@
                     <td>{{ $doc->trainee->cin }}</td>
                     <td>{{ $doc->trainee->filiere->code_filiere ?? '—' }}</td>
                     @if(!$type)
-                    <td><span class="badge badge-primary">{{ $doc->type }}</span></td>
+                    <td><span class="badge bg-primary">{{ $doc->type }}</span></td>
                     @endif
                     <td>{{ $doc->reference_number ?? '—' }}</td>
                     <td>
@@ -142,13 +142,13 @@
                     <td>
                         @php
                             $statuts = [
-                                'Stock'     => ['badge-success',  'En stock'],
-                                'Temp_Out'  => ['badge-warning',  'Retrait temp.'],
-                                'Final_Out' => ['badge-danger',   'Retrait déf.'],
-                                'Ecoule'    => ['badge-dark',     'Écoulé'],
-                                'Remis'     => ['badge-info',     'Remis'],
+                                'Stock'     => ['bg-success',  'En stock'],
+                                'Temp_Out'  => ['bg-warning',  'Retrait temp.'],
+                                'Final_Out' => ['bg-danger',   'Retrait déf.'],
+                                'Ecoule'    => ['bg-dark',     'Écoulé'],
+                                'Remis'     => ['bg-info',     'Remis'],
                             ];
-                            [$cls, $lbl] = $statuts[$doc->status] ?? ['badge-secondary', $doc->status];
+                            [$cls, $lbl] = $statuts[$doc->status] ?? ['bg-secondary', $doc->status];
                         @endphp
                         <span class="badge {{ $cls }}">{{ $lbl }}</span>
                     </td>

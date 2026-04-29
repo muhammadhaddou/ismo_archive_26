@@ -1,10 +1,10 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 @section('title', 'Retraits définitifs — Bac')
 
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <h1><i class="fas fa-sign-out-alt"></i> Bac — Retraits définitifs</h1>
-        <span class="badge badge-danger" style="font-size:14px">
+        <span class="badge bg-danger" style="font-size:14px">
             {{ $documents->total() }} retraits définitifs
         </span>
     </div>
@@ -45,7 +45,7 @@
                     </select>
                 </div>
                 <div class="col-md-4 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary mr-2">
+                    <button type="submit" class="btn btn-primary me-2">
                         <i class="fas fa-filter"></i> Filtrer
                     </button>
                     <a href="{{ route('documents.bac.final-out') }}" class="btn btn-secondary">
@@ -124,7 +124,7 @@
                                     <i class="fas fa-upload"></i> Scanner
                                 </a>
                             @else
-                                <span class="badge badge-secondary">Sans signature</span>
+                                <span class="badge bg-secondary">Sans signature</span>
                             @endif
                         @endif
                     </td>

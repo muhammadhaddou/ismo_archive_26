@@ -1,4 +1,4 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
 @section('title', 'Validation finale')
 
@@ -15,7 +15,7 @@
     <div class="alert alert-warning">
         <h5><i class="fas fa-exclamation-triangle"></i> Documents non remis:</h5>
         @foreach($missing as $m)
-            <span class="badge badge-danger mr-1">{{ $m }}</span>
+            <span class="badge bg-danger me-1">{{ $m }}</span>
         @endforeach
         <p class="mt-2 mb-0">
             Ces documents n'ont pas encore été remis définitivement.
@@ -60,19 +60,19 @@
                             <td>{{ $type }}</td>
                             <td>
                                 @if(!$doc)
-                                    <span class="badge badge-light border">
+                                    <span class="badge bg-light border">
                                         <i class="fas fa-times text-danger"></i> Non enregistré
                                     </span>
                                 @elseif(in_array($doc->status, ['Final_Out','Remis']))
-                                    <span class="badge badge-success">
+                                    <span class="badge bg-success">
                                         <i class="fas fa-check"></i> Remis
                                     </span>
                                 @elseif($doc->status == 'Temp_Out')
-                                    <span class="badge badge-warning">
+                                    <span class="badge bg-warning">
                                         <i class="fas fa-clock"></i> Retrait temp.
                                     </span>
                                 @else
-                                    <span class="badge badge-secondary">
+                                    <span class="badge bg-secondary">
                                         <i class="fas fa-archive"></i> En stock
                                     </span>
                                 @endif
@@ -135,7 +135,7 @@
                 <div class="alert alert-success mb-0 py-2">
                     <i class="fas fa-check-circle"></i>
                     <strong>Code détecté :</strong>
-                    <span id="scan-result-text" class="ml-1"></span>
+                    <span id="scan-result-text" class="ms-1"></span>
                 </div>
             </div>
         </div>
@@ -213,12 +213,12 @@
                                   placeholder="Notes éventuelles...">{{ old('observations') }}</textarea>
                     </div>
 
-                    <button type="submit" class="btn btn-success btn-lg btn-block">
+                    <button type="submit" class="btn btn-success btn-lg w-100">
                         <i class="fas fa-check-double"></i>
                         Confirmer la validation finale
                     </button>
                     <a href="{{ route('trainees.show', $trainee) }}"
-                       class="btn btn-secondary btn-block mt-2">
+                       class="btn btn-secondary w-100 mt-2">
                         <i class="fas fa-arrow-left"></i> Retour
                     </a>
                 </form>

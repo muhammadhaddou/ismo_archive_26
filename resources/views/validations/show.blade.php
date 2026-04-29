@@ -1,4 +1,4 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 @section('title', 'Validation finale')
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">

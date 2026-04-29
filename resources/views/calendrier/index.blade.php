@@ -1,50 +1,72 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 @section('title', 'Calendrier des relances')
-
-@section('content_header')
-    <div class="d-flex justify-content-between align-items-center">
-        <h1><i class="fas fa-calendar-alt"></i> Calendrier des relances</h1>
-        <a href="{{ route('documents.bac.temp-out') }}" class="btn btn-warning">
-            <i class="fas fa-clock"></i> Voir tous les retraits temporaires
-        </a>
-    </div>
-@stop
 
 @section('content')
 
+<!-- HEADER SECTION -->
+<div class="row align-items-center mt-4 mb-4">
+    <div class="col-md-6">
+        <h2 class="font-weight-bold text-body" style="letter-spacing: -0.5px;">
+            <i class="fas fa-calendar-alt text-primary me-2"></i> Calendrier des relances
+        </h2>
+        <p class="text-muted mb-0">Suivi des échéances pour les retraits temporaires.</p>
+    </div>
+    <div class="col-md-6 text-end d-none d-md-block">
+        <a href="{{ route('documents.bac.temp-out') }}" class="btn btn-warning font-weight-bold shadow-sm" style="border-radius: 8px;">
+            <i class="fas fa-clock me-1"></i> Voir tous les retraits temporaires
+        </a>
+    </div>
+    <div class="col-12 mt-3 d-md-none">
+        <a href="{{ route('documents.bac.temp-out') }}" class="btn btn-warning w-100 font-weight-bold shadow-sm" style="border-radius: 8px;">
+            <i class="fas fa-clock me-1"></i> Voir tous les retraits temporaires
+        </a>
+    </div>
+</div>
+
 {{-- Stats --}}
-<div class="row mb-3">
-    <div class="col-md-4">
-        <div class="small-box bg-danger">
-            <div class="inner">
-                <h3>{{ $stats['expired'] }}</h3>
-                <p>Délai dépassé</p>
+<div class="row mb-4">
+    <div class="col-xl col-md-4 mb-3">
+        <div class="card phoenix-card h-100 bg-danger-lt" style="border-top: 4px solid #ef4444;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h6 class="text-danger font-weight-bold text-uppercase" style="font-size: 0.75rem;">Délai dépassé</h6>
+                    <span class="badge bg-danger text-white"><i class="fas fa-exclamation-triangle"></i></span>
+                </div>
+                <h3 class="font-weight-bold text-body mb-1">{{ $stats['expired'] }}</h3>
+                <p class="text-muted small mb-0">Retraits en retard</p>
             </div>
-            <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="small-box bg-warning">
-            <div class="inner">
-                <h3>{{ $stats['today'] }}</h3>
-                <p>Échéance aujourd'hui</p>
+    
+    <div class="col-xl col-md-4 mb-3">
+        <div class="card phoenix-card h-100 bg-warning-lt" style="border-top: 4px solid #f59e0b;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h6 class="text-warning font-weight-bold text-uppercase" style="font-size: 0.75rem;">Échéance aujourd'hui</h6>
+                    <span class="badge bg-warning text-white"><i class="fas fa-bell"></i></span>
+                </div>
+                <h3 class="font-weight-bold text-body mb-1">{{ $stats['today'] }}</h3>
+                <p class="text-muted small mb-0">À retourner aujourd'hui</p>
             </div>
-            <div class="icon"><i class="fas fa-bell"></i></div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="small-box bg-info">
-            <div class="inner">
-                <h3>{{ $stats['total'] }}</h3>
-                <p>Total en attente</p>
+    
+    <div class="col-xl col-md-4 mb-3">
+        <div class="card phoenix-card h-100 bg-primary-lt" style="border-top: 4px solid #3b82f6;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h6 class="text-primary font-weight-bold text-uppercase" style="font-size: 0.75rem;">Total en attente</h6>
+                    <span class="badge bg-primary text-white"><i class="fas fa-list"></i></span>
+                </div>
+                <h3 class="font-weight-bold text-body mb-1">{{ $stats['total'] }}</h3>
+                <p class="text-muted small mb-0">Tous les retraits en cours</p>
             </div>
-            <div class="icon"><i class="fas fa-list"></i></div>
         </div>
     </div>
 </div>
 
 {{-- Navigation شهر --}}
-<div class="card mb-3">
+<div class="card phoenix-card mb-4">
     <div class="card-body">
         <div class="d-flex justify-content-between align-items-center">
             @php
@@ -52,127 +74,122 @@
                 $nextMonth = \Carbon\Carbon::createFromDate($year, $month, 1)->addMonth();
             @endphp
             <a href="{{ route('calendrier', ['month' => $prevMonth->month, 'year' => $prevMonth->year]) }}"
-               class="btn btn-secondary">
-                <i class="fas fa-chevron-left"></i> {{ $prevMonth->translatedFormat('F Y') }}
+               class="btn btn-light font-weight-bold" style="border-radius: 8px; border: 1px solid #e2e8f0;">
+                <i class="fas fa-chevron-left me-1 d-none d-sm-inline"></i> <span class="d-none d-sm-inline">{{ mb_convert_case($prevMonth->translatedFormat('F Y'), MB_CASE_TITLE, 'UTF-8') }}</span><span class="d-sm-none"><i class="fas fa-chevron-left"></i></span>
             </a>
-            <h4 class="mb-0 text-primary">
-                <i class="fas fa-calendar"></i>
-                {{ $startOfMonth->translatedFormat('F Y') }}
+            <h4 class="mb-0 text-primary font-weight-bold" style="font-size: 1.25rem;">
+                <i class="far fa-calendar-alt me-2 d-none d-sm-inline"></i>{{ mb_convert_case($startOfMonth->translatedFormat('F Y'), MB_CASE_TITLE, 'UTF-8') }}
             </h4>
             <a href="{{ route('calendrier', ['month' => $nextMonth->month, 'year' => $nextMonth->year]) }}"
-               class="btn btn-secondary">
-                {{ $nextMonth->translatedFormat('F Y') }} <i class="fas fa-chevron-right"></i>
+               class="btn btn-light font-weight-bold" style="border-radius: 8px; border: 1px solid #e2e8f0;">
+                <span class="d-none d-sm-inline">{{ mb_convert_case($nextMonth->translatedFormat('F Y'), MB_CASE_TITLE, 'UTF-8') }}</span> <i class="fas fa-chevron-right ms-1 d-none d-sm-inline"></i><span class="d-sm-none"><i class="fas fa-chevron-right"></i></span>
             </a>
         </div>
     </div>
 </div>
 
 {{-- Calendrier --}}
-<div class="card">
+<div class="card phoenix-card mb-4">
     <div class="card-body p-0">
-        <table class="table table-bordered mb-0" id="calendar-table">
-            <thead>
-                <tr class="bg-primary text-white text-center">
-                    <th>Lun</th>
-                    <th>Mar</th>
-                    <th>Mer</th>
-                    <th>Jeu</th>
-                    <th>Ven</th>
-                    <th class="bg-secondary">Sam</th>
-                    <th class="bg-secondary">Dim</th>
-                </tr>
-            </thead>
-            <tbody>
-                @php
-                    $firstDay    = $startOfMonth->copy()->startOfWeek(\Carbon\Carbon::MONDAY);
-                    $lastDay     = $startOfMonth->copy()->endOfMonth()->endOfWeek(\Carbon\Carbon::SUNDAY);
-                    $currentDay  = $firstDay->copy();
-                @endphp
-
-                @while($currentDay <= $lastDay)
-                <tr>
-                    @for($i = 0; $i < 7; $i++)
+        <div class="table-responsive">
+            <table class="table table-bordered mb-0" id="calendar-table">
+                <thead>
+                    <tr class="text-center text-uppercase text-muted">
+                        <th>Lun</th>
+                        <th>Mar</th>
+                        <th>Mer</th>
+                        <th>Jeu</th>
+                        <th>Ven</th>
+                        <th style="background-color: #f8fafc;">Sam</th>
+                        <th style="background-color: #f8fafc;">Dim</th>
+                    </tr>
+                </thead>
+                <tbody>
                     @php
-                        $day        = $currentDay->day;
-                        $isCurrentMonth = $currentDay->month == $month;
-                        $isToday    = $currentDay->isToday();
-                        $isWeekend  = $currentDay->isWeekend();
-                        $dayEvents  = $events->get($day, collect());
-                        $hasExpired = $isCurrentMonth && $dayEvents->where('is_expired', true)->count() > 0;
-                        $hasToday   = $isCurrentMonth && $isToday && $dayEvents->count() > 0;
+                        $firstDay    = $startOfMonth->copy()->startOfWeek(1); // 1 = Lundi
+                        $lastDay     = $startOfMonth->copy()->endOfMonth()->endOfWeek(0); // 0 = Dimanche
+                        $currentDay  = $firstDay->copy();
                     @endphp
-                    <td style="width:14.28%; min-height:100px; vertical-align:top; padding:6px;
-                               {{ !$isCurrentMonth ? 'background:#f8f9fa; color:#ccc;' : '' }}
-                               {{ $isWeekend && $isCurrentMonth ? 'background:#fff8f0;' : '' }}
-                               {{ $isToday ? 'border: 2px solid #007bff !important;' : '' }}">
 
-                        {{-- رقم اليوم --}}
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <span style="font-weight:{{ $isToday ? 'bold' : 'normal' }};
-                                         color:{{ $isToday ? '#007bff' : 'inherit' }};
-                                         font-size:14px">
-                                {{ $isCurrentMonth ? $day : '' }}
-                            </span>
-                            @if($isToday && $isCurrentMonth)
-                                <span class="badge badge-primary" style="font-size:9px">Aujourd'hui</span>
+                    @while($currentDay <= $lastDay)
+                    <tr>
+                        @for($i = 0; $i < 7; $i++)
+                        @php
+                            $day        = $currentDay->day;
+                            $isCurrentMonth = $currentDay->month == $month;
+                            $isToday    = $currentDay->isToday();
+                            $isWeekend  = $currentDay->isWeekend();
+                            $dayEvents  = $events->get($day, collect());
+                            $hasExpired = $isCurrentMonth && $dayEvents->where('is_expired', true)->count() > 0;
+                            $hasToday   = $isCurrentMonth && $isToday && $dayEvents->count() > 0;
+                        @endphp
+                        <td style="width:14.28%; min-width: 120px; min-height:120px; vertical-align:top; padding:10px;
+                                   {{ !$isCurrentMonth ? 'background:#f8fafc; color:#cbd5e1;' : '' }}
+                                   {{ $isWeekend && $isCurrentMonth ? 'background:#fdfdfd;' : '' }}
+                                   {{ $isToday ? 'border: 2px solid #3b82f6 !important; background:#f0f9ff;' : '' }}">
+
+                            {{-- رقم اليوم --}}
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="font-weight-bold" style="color:{{ $isToday ? '#3b82f6' : ($isCurrentMonth ? '#475569' : 'inherit') }}; font-size:1rem;">
+                                    {{ $isCurrentMonth ? $day : '' }}
+                                </span>
+                                @if($isToday && $isCurrentMonth)
+                                    <span class="badge bg-primary text-white" style="font-size:0.7rem">Auj.</span>
+                                @endif
+                            </div>
+
+                            {{-- Events --}}
+                            @if($isCurrentMonth)
+                                @foreach($dayEvents as $event)
+                                <a href="{{ $event['doc_url'] }}"
+                                   class="d-block mb-2 p-2 rounded text-decoration-none shadow-sm event-card text-white"
+                                   style="font-size:0.75rem; line-height:1.4;
+                                          background: {{ $event['is_expired'] ? '#ef4444' : ($isToday ? '#f59e0b' : '#3b82f6') }};
+                                          border-left: 4px solid {{ $event['is_expired'] ? '#b91c1c' : ($isToday ? '#b45309' : '#1d4ed8') }};
+                                          transition: transform 0.2s;">
+                                    <strong class="d-block text-truncate">{{ $event['trainee'] }}</strong>
+                                    <span class="text-truncate d-block opacity-75">{{ $event['filiere'] }}</span>
+                                    @if($event['is_expired'])
+                                        <div class="mt-1 font-weight-bold" style="font-size:0.7rem; color: #fee2e2;">
+                                            <i class="fas fa-exclamation-circle"></i> Retard: {{ $event['overdue'] }}
+                                        </div>
+                                    @endif
+                                    @if($event['phone'])
+                                        <div class="mt-1">
+                                            <span style="color:inherit; font-size:0.7rem; opacity:0.9;">
+                                                <i class="fas fa-phone-alt me-1"></i> {{ $event['phone'] }}
+                                            </span>
+                                        </div>
+                                    @endif
+                                </a>
+                                @endforeach
                             @endif
-                        </div>
-
-                        {{-- Events --}}
-                        @if($isCurrentMonth)
-                            @foreach($dayEvents as $event)
-                            <a href="{{ $event['doc_url'] }}"
-                               class="d-block mb-1 p-1 rounded text-decoration-none"
-                               style="font-size:11px; line-height:1.3;
-                                      background: {{ $event['is_expired'] ? '#f8d7da' : ($isToday ? '#fff3cd' : '#d1ecf1') }};
-                                      color: {{ $event['is_expired'] ? '#721c24' : ($isToday ? '#856404' : '#0c5460') }};
-                                      border-left: 3px solid {{ $event['is_expired'] ? '#dc3545' : ($isToday ? '#ffc107' : '#17a2b8') }}">
-                                <strong>{{ Str::limit($event['trainee'], 15) }}</strong>
-                                <br>
-                                <span>{{ $event['filiere'] }}</span>
-                                @if($event['is_expired'])
-                                    <br>
-                                    <span style="color:#dc3545; font-weight:bold">
-                                        ⚠ Retard: {{ $event['overdue'] }}
-                                    </span>
-                                @endif
-                                @if($event['phone'])
-                                    <br>
-                                    <a href="tel:{{ $event['phone'] }}"
-                                       style="color:inherit; font-size:10px">
-                                        📞 {{ $event['phone'] }}
-                                    </a>
-                                @endif
-                            </a>
-                            @endforeach
-                        @endif
-                    </td>
-                    @php $currentDay->addDay() @endphp
-                    @endfor
-                </tr>
-                @endwhile
-            </tbody>
-        </table>
+                        </td>
+                        @php $currentDay->addDay() @endphp
+                        @endfor
+                    </tr>
+                    @endwhile
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 {{-- Légende --}}
-<div class="row mt-3">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-body py-2">
-                <span class="mr-3">
-                    <span style="display:inline-block; width:12px; height:12px; background:#f8d7da; border-left:3px solid #dc3545; margin-right:4px"></span>
-                    Délai dépassé
-                </span>
-                <span class="mr-3">
-                    <span style="display:inline-block; width:12px; height:12px; background:#fff3cd; border-left:3px solid #ffc107; margin-right:4px"></span>
-                    Échéance aujourd'hui
-                </span>
-                <span>
-                    <span style="display:inline-block; width:12px; height:12px; background:#d1ecf1; border-left:3px solid #17a2b8; margin-right:4px"></span>
-                    Échéance à venir
-                </span>
+<div class="card phoenix-card mb-4">
+    <div class="card-body py-3">
+        <div class="d-flex flex-wrap justify-content-center align-items-center">
+            <div class="mx-3 my-1 d-flex align-items-center">
+                <span class="rounded d-inline-block me-2 shadow-sm" style="width:16px; height:16px; background:#ef4444; border-left:4px solid #b91c1c;"></span>
+                <span class="font-weight-medium text-muted small text-uppercase">Délai dépassé</span>
+            </div>
+            <div class="mx-3 my-1 d-flex align-items-center">
+                <span class="rounded d-inline-block me-2 shadow-sm" style="width:16px; height:16px; background:#f59e0b; border-left:4px solid #b45309;"></span>
+                <span class="font-weight-medium text-muted small text-uppercase">Échéance aujourd'hui</span>
+            </div>
+            <div class="mx-3 my-1 d-flex align-items-center">
+                <span class="rounded d-inline-block me-2 shadow-sm" style="width:16px; height:16px; background:#3b82f6; border-left:4px solid #1d4ed8;"></span>
+                <span class="font-weight-medium text-muted small text-uppercase">Échéance à venir</span>
             </div>
         </div>
     </div>
@@ -182,7 +199,54 @@
 
 @section('css')
 <style>
-#calendar-table td { height: 100px; }
-#calendar-table td a:hover { opacity: 0.85; }
+/* Font override for Phoenix Theme */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+body, .content-wrapper, .main-header, .main-sidebar {
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* Background Override */
+.content-wrapper {
+    background-color: #f8fafc !important; /* Very light slate gray */
+}
+
+/* Phoenix Card Style */
+.phoenix-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    transition: box-shadow 0.3s ease-in-out;
+}
+.phoenix-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+}
+
+/* Soft Badges */
+.badge-soft-primary { background-color: #e0e7ff; color: #4338ca; }
+.badge-soft-success { background-color: #dcfce7; color: #15803d; }
+.badge-soft-warning { background-color: #fef3c7; color: #b45309; }
+.badge-soft-danger { background-color: #fee2e2; color: #b91c1c; }
+.badge-soft-info { background-color: #e0f2fe; color: #0369a1; }
+
+/* Table Style */
+.phoenix-table th {
+    border-top: none;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+.phoenix-table td {
+    border: 1px solid #e2e8f0;
+}
+
+#calendar-table td { height: 120px; }
+.event-card:hover { 
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); 
+    opacity: 0.9;
+}
 </style>
 @stop

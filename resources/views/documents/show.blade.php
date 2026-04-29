@@ -1,4 +1,4 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 @section('title', 'Document')
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
@@ -23,13 +23,13 @@
                         <th>Statut</th>
                         <td>
                             @if($document->status == 'Stock')
-                                <span class="badge badge-success">En stock</span>
+                                <span class="badge bg-success">En stock</span>
                             @elseif($document->status == 'Temp_Out')
-                                <span class="badge badge-warning">Retrait temporaire</span>
+                                <span class="badge bg-warning">Retrait temporaire</span>
                             @elseif($document->status == 'Final_Out')
-                                <span class="badge badge-danger">Retrait définitif</span>
+                                <span class="badge bg-danger">Retrait définitif</span>
                             @else
-                                <span class="badge badge-info">Remis</span>
+                                <span class="badge bg-info">Remis</span>
                             @endif
                         </td>
                     </tr>
@@ -67,11 +67,11 @@
                         <tr>
                             <td>
                                 @if($mv->action_type == 'Saisie')
-                                    <span class="badge badge-info">Saisie</span>
+                                    <span class="badge bg-info">Saisie</span>
                                 @elseif($mv->action_type == 'Sortie')
-                                    <span class="badge badge-warning">Sortie</span>
+                                    <span class="badge bg-warning">Sortie</span>
                                 @else
-                                    <span class="badge badge-success">Retour</span>
+                                    <span class="badge bg-success">Retour</span>
                                 @endif
                             </td>
                             <td>{{ $mv->user->name }}</td>
@@ -82,7 +82,7 @@
                                     <br><small class="text-primary">
                                         <i class="fas fa-user-shield"></i> Par procuration ({{ $mv->proxy_name }} - {{ $mv->proxy_cin }})
                                         @if($mv->proxy_document_path)
-                                            <a href="{{ route('scans.show', ['path' => $mv->proxy_document_path]) }}" target="_blank" class="ml-1"><i class="fas fa-download"></i> Fichier joint</a>
+                                            <a href="{{ route('scans.show', ['path' => $mv->proxy_document_path]) }}" target="_blank" class="ms-1"><i class="fas fa-download"></i> Fichier joint</a>
                                         @endif
                                     </small>
                                 @endif

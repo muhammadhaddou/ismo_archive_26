@@ -23,3 +23,11 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Fichiers temporaires
+test.php
+migrate.php
+migrate_classes.php
+rendered.html
+public/test.php
+*.sql

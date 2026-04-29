@@ -1,4 +1,4 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 @section('title', 'Diplômés — Documents à récupérer')
 
 @section('content_header')
@@ -8,7 +8,7 @@
             Diplômés — Documents à récupérer
         </h1>
         <div class="d-flex align-items-center gap-2">
-            <span class="badge badge-success mr-2" style="font-size:14px">
+            <span class="badge bg-success me-2" style="font-size:14px">
                 {{ $trainees->total() }} diplômés
             </span>
             <button type="button" class="btn btn-success" data-toggle="modal" data-target="#modalPromouvoir">
@@ -54,7 +54,7 @@
                     </select>
                 </div>
                 <div class="col-md-3 d-flex">
-                    <button type="submit" class="btn btn-primary mr-2">
+                    <button type="submit" class="btn btn-primary me-2">
                         <i class="fas fa-filter"></i> Filtrer
                     </button>
                     <a href="{{ route('diplomes.prets') }}" class="btn btn-secondary">
@@ -91,7 +91,7 @@
                 @php
                     $docs       = $t->documents->groupBy('type');
                     $allPresent = collect(['Bac','Diplome','Attestation','Bulletin'])
-                        ->every(fn($type) => isset($docs[$type]) && $docs[$type]->isNotEmpty());
+                        ->every(fn($type) => isset($docs[$type]) && $docs[$type]->isNotEmpty() && in_array($docs[$type]->first()->status, ['Final_Out', 'Remis']));
                 @endphp
                 <tr>
                     <td>{{ $loop->iteration }}</td>
@@ -104,13 +104,13 @@
                         @endif
                         @if($allPresent)
                             <br>
-                            <span class="badge badge-success mt-1">
+                            <span class="badge bg-success mt-1">
                                 <i class="fas fa-check-circle"></i> Complet
                             </span>
                         @else
                             <br>
                             <button class="btn btn-xs btn-warning mt-1 btn-promote" data-id="{{ $t->id }}">
-                                <i class="fas fa-plus-circle"></i> Ajouter
+                                <i class="fas fa-hand-holding"></i> Retirer documents
                             </button>
                         @endif
                     </td>
@@ -123,19 +123,19 @@
                     @php $doc = isset($docs[$type]) ? $docs[$type]->first() : null; @endphp
                     <td class="text-center">
                         @if(!$doc)
-                            <span class="badge badge-light border">
+                            <span class="badge bg-light border">
                                 <i class="fas fa-times text-danger"></i> Manquant
                             </span>
                         @elseif(in_array($doc->status, ['Final_Out','Remis']))
-                            <span class="badge badge-success">
+                            <span class="badge bg-success">
                                 <i class="fas fa-check"></i> Remis
                             </span>
                         @elseif($doc->status == 'Temp_Out')
-                            <span class="badge badge-warning">
+                            <span class="badge bg-warning">
                                 <i class="fas fa-clock"></i> Temp.
                             </span>
                         @else
-                            <span class="badge badge-info">
+                            <span class="badge bg-info">
                                 <i class="fas fa-archive"></i> En stock
                             </span>
                         @endif
@@ -144,7 +144,7 @@
 
                     <td class="text-center">
                         @if($t->validation)
-                            <span class="badge badge-success">
+                            <span class="badge bg-success">
                                 <i class="fas fa-check-double"></i>
                                 {{ $t->validation->date_validation->format('d/m/Y') }}
                             </span>
@@ -157,11 +157,12 @@
 
                     {{-- Colonne Signature --}}
                     <td class="text-center">
-                        @if($t->validation && $t->validation->signature_path)
-                            <img src="{{ Storage::url($t->validation->signature_path) }}"
+                        @if($t->validation && $t->validation->signature_scan)
+                            @php $sigUrl = route('scans.show', $t->validation->signature_scan); @endphp
+                            <img src="{{ $sigUrl }}"
                                  alt="Signature"
                                  style="max-height:40px;border:1px solid #ccc;border-radius:4px;cursor:pointer;"
-                                 onclick="viewSignature('{{ Storage::url($t->validation->signature_path) }}')">
+                                 onclick="viewSignature('{{ $sigUrl }}')">
                         @else
                             <button class="btn btn-sm btn-outline-primary btn-scan-signature"
                                     data-id="{{ $t->id }}"
@@ -216,7 +217,7 @@
                                         border-radius:4px;pointer-events:none;"></div>
                         </div>
                         <div class="mt-2">
-                            <button id="btnCapture" class="btn btn-success mr-2">
+                            <button id="btnCapture" class="btn btn-success me-2">
                                 <i class="fas fa-camera"></i> Capturer
                             </button>
                             <button id="btnSwitchCamera" class="btn btn-secondary">
@@ -238,7 +239,7 @@
                             </span>
                         </div>
                         <div class="mt-2">
-                            <button id="btnRetake" class="btn btn-warning mr-2" style="display:none;">
+                            <button id="btnRetake" class="btn btn-warning me-2" style="display:none;">
                                 <i class="fas fa-redo"></i> Reprendre
                             </button>
                             <button id="btnSaveSignature" class="btn btn-primary" style="display:none;">
@@ -267,41 +268,149 @@
     </div>
 </div>
 
-{{-- MODAL PROMOUVOIR UN DIPLÔMÉ --}}
-<div class="modal fade" id="modalPromouvoir" aria-hidden="true">
-    <div class="modal-dialog modal-md">
+{{-- ============================================================ --}}
+{{-- MODAL PROMOUVOIR UN DIPLÔMÉ — Formulaire complet --}}
+{{-- ============================================================ --}}
+<div class="modal fade" id="modalPromouvoir" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-success text-white">
                 <h5 class="modal-title">
-                    <i class="fas fa-user-graduate"></i> Promouvoir un stagiaire en diplômé
+                    <i class="fas fa-user-graduate me-2"></i> Nouveau Diplômé
                 </h5>
                 <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
             </div>
             <div class="modal-body">
-                <p class="text-muted mb-3">
-                    <i class="fas fa-info-circle"></i>
-                    Sélectionnez un stagiaire pour changer son statut en <strong>Diplômé</strong>.
-                    Il apparaîtra ensuite dans cette liste.
-                </p>
-                <div class="form-group">
-                    <label>Rechercher un stagiaire</label>
-                    <select id="selectTraineePromote" class="form-control select2" style="width:100%">
-                        <option value="">— Tapez un nom ou CIN —</option>
-                        @foreach(\App\Models\Trainee::whereIn('statut', ['en_formation','redoublant','abandon'])->orderBy('last_name')->get() as $tr)
-                            <option value="{{ $tr->id }}">
-                                {{ $tr->last_name }} {{ $tr->first_name }}
-                                &nbsp;({{ $tr->cin }}) — {{ $tr->filiere?->nom_filiere ?? '—' }}
-                            </option>
-                        @endforeach
-                    </select>
+
+                {{-- ÉTAPE 1 : Recherche stagiaire --}}
+                <div id="step-search">
+                    <div class="alert alert-info py-2 mb-3">
+                        <i class="fas fa-info-circle"></i>
+                        Recherchez le stagiaire à promouvoir. Tous ses documents seront automatiquement remis.
+                    </div>
+                    <div class="form-group">
+                        <label class="font-weight-bold"><i class="fas fa-search me-1"></i> Nom / CIN / CEF</label>
+                        <input type="text" id="promoteSearchInput" class="form-control form-control-lg"
+                               placeholder="Tapez un nom, CIN ou CEF..." autocomplete="off">
+                        <div id="promoteSearchResults" class="list-group mt-1" style="max-height:220px;overflow-y:auto;display:none"></div>
+                    </div>
                 </div>
-                <div id="promoteResult" class="mt-2" style="display:none"></div>
+
+                {{-- ÉTAPE 2 : Confirmation + Uploads (caché au départ) --}}
+                <div id="step-confirm" style="display:none">
+                    {{-- Fiche stagiaire --}}
+                    <div class="card border-success mb-3">
+                        <div class="card-header bg-success text-white py-2">
+                            <strong><i class="fas fa-user-check me-1"></i> Stagiaire sélectionné</strong>
+                        </div>
+                        <div class="card-body py-2">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong id="prom-name"></strong><br>
+                                    <small class="text-muted">CIN : <span id="prom-cin"></span> &nbsp;|&nbsp; CEF : <span id="prom-cef"></span></small>
+                                </div>
+                                <div class="col-md-6 text-md-right">
+                                    <small class="text-muted">Filière : <span id="prom-filiere"></span></small><br>
+                                    <small class="text-muted">Groupe : <span id="prom-group"></span> &nbsp;|&nbsp; Année : <span id="prom-year"></span></small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="prom-trainee-id">
+
+                    {{-- Documents à remettre --}}
+                    <h6 class="font-weight-bold text-secondary mb-2"><i class="fas fa-folder-open me-1"></i> Documents à remettre automatiquement</h6>
+                    <div class="row mb-3">
+                        {{-- BAC --}}
+                        <div class="col-md-6 mb-3">
+                            <div class="card border-danger">
+                                <div class="card-header bg-danger-lt py-1">
+                                    <strong>🎓 Baccalauréat</strong>
+                                    <span class="badge bg-danger ms-2">Retrait Définitif</span>
+                                </div>
+                                <div class="card-body py-2">
+                                    <div class="form-group mb-0">
+                                        <label class="small text-muted"><i class="fas fa-file-upload me-1"></i> Scan (optionnel)</label>
+                                        <input type="file" name="scan_bac" id="scan_bac" class="form-control-file" accept=".pdf,.jpg,.jpeg,.png">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {{-- DIPLOME --}}
+                        <div class="col-md-6 mb-3">
+                            <div class="card border-success">
+                                <div class="card-header bg-success-lt py-1">
+                                    <strong>📜 Diplôme</strong>
+                                    <span class="badge bg-success ms-2">Remis</span>
+                                </div>
+                                <div class="card-body py-2">
+                                    <div class="form-group mb-0">
+                                        <label class="small text-muted"><i class="fas fa-file-upload me-1"></i> Scan (optionnel)</label>
+                                        <input type="file" name="scan_diplome" id="scan_diplome" class="form-control-file" accept=".pdf,.jpg,.jpeg,.png">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {{-- ATTESTATION --}}
+                        <div class="col-md-6 mb-3">
+                            <div class="card border-info">
+                                <div class="card-header bg-info-lt py-1">
+                                    <strong>📋 Attestation</strong>
+                                    <span class="badge bg-info ms-2">Remis</span>
+                                </div>
+                                <div class="card-body py-2">
+                                    <div class="form-group mb-0">
+                                        <label class="small text-muted"><i class="fas fa-file-upload me-1"></i> Scan (optionnel)</label>
+                                        <input type="file" name="scan_attestation" id="scan_attestation" class="form-control-file" accept=".pdf,.jpg,.jpeg,.png">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {{-- BULLETIN --}}
+                        <div class="col-md-6 mb-3">
+                            <div class="card border-warning">
+                                <div class="card-header bg-warning-lt py-1">
+                                    <strong>📊 Bulletin</strong>
+                                    <span class="badge bg-warning ms-2">Remis</span>
+                                </div>
+                                <div class="card-body py-2">
+                                    <div class="form-group mb-0">
+                                        <label class="small text-muted"><i class="fas fa-file-upload me-1"></i> Scan (optionnel)</label>
+                                        <input type="file" name="scan_bulletin" id="scan_bulletin" class="form-control-file" accept=".pdf,.jpg,.jpeg,.png">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Signature --}}
+                    <div class="card border-primary mb-2">
+                        <div class="card-header bg-primary-lt py-1">
+                            <strong><i class="fas fa-pen-nib me-1"></i> Signature du stagiaire</strong>
+                            <small class="text-muted ms-2">(optionnel)</small>
+                        </div>
+                        <div class="card-body py-2">
+                            <div class="form-group mb-0">
+                                <label class="small text-muted"><i class="fas fa-image me-1"></i> Importer une signature (JPG, PNG)</label>
+                                <input type="file" name="signature_file" id="prom-signature" class="form-control-file" accept=".jpg,.jpeg,.png">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="promoteResult" class="mt-2" style="display:none"></div>
+
+                    <button type="button" class="btn btn-sm btn-link text-muted" id="btnChangeTrainee">
+                        <i class="fas fa-arrow-left"></i> Changer de stagiaire
+                    </button>
+                </div>
+
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">
                     <i class="fas fa-times"></i> Annuler
                 </button>
-                <button type="button" id="btnConfirmPromote" class="btn btn-success" disabled>
+                <button type="button" id="btnConfirmPromote" class="btn btn-success" style="display:none">
                     <i class="fas fa-check"></i> Confirmer la promotion
                 </button>
             </div>
@@ -311,59 +420,143 @@
 
 @stop
 
+@section('css')
+<style>
+@keyframes spin {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+@stop
+
 @section('js')
 <script>
-$('.select2').select2();
-$('#selectTraineePromote').select2({ dropdownParent: $('#modalPromouvoir'), width: '100%' });
+// ═══════════════════════════════════════════
+// Données pour la recherche live (promote)
+// ═══════════════════════════════════════════
+@php
+$promoteTrainees = \App\Models\Trainee::with('filiere')
+    ->whereIn('statut', ['en_formation','redoublant','abandon'])
+    ->orderBy('last_name')->get()
+    ->map(fn($t) => [
+        'id'       => $t->id,
+        'nom'      => strtoupper($t->last_name).' '.ucfirst(strtolower($t->first_name)),
+        'cin'      => $t->cin ?? '',
+        'cef'      => $t->cef ?? '',
+        'filiere'  => optional($t->filiere)->nom_filiere ?? '—',
+        'group'    => $t->group ?? '—',
+        'year'     => $t->graduation_year ?? '—',
+    ])->values();
+@endphp
+var promoteTrainees = {!! json_encode($promoteTrainees) !!};
 
-// ── Modal : Promouvoir un diplômé ──
-$('#selectTraineePromote').on('change', function () {
-    const val = $(this).val();
-    $('#btnConfirmPromote').prop('disabled', !val);
+// Reset modal when opened
+$('#modalPromouvoir').on('show.bs.modal', function () {
+    $('#promoteSearchInput').val('');
+    $('#promoteSearchResults').hide().html('');
+    $('#step-search').show();
+    $('#step-confirm').hide();
+    $('#btnConfirmPromote').hide();
     $('#promoteResult').hide();
+    // reset file inputs
+    ['scan_bac','scan_diplome','scan_attestation','scan_bulletin','prom-signature'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.value = '';
+    });
 });
 
+// Live search
+$('#promoteSearchInput').on('input', function () {
+    const q = $(this).val().toLowerCase().trim();
+    if (!q) { $('#promoteSearchResults').hide(); return; }
+
+    const results = promoteTrainees.filter(t =>
+        t.nom.toLowerCase().includes(q) ||
+        t.cin.toLowerCase().includes(q) ||
+        t.cef.toLowerCase().includes(q)
+    ).slice(0, 15);
+
+    const $res = $('#promoteSearchResults').html('').show();
+    if (!results.length) {
+        $res.html('<div class="list-group-item text-muted text-center"><i class="fas fa-inbox"></i> Aucun stagiaire trouvé</div>');
+        return;
+    }
+    results.forEach(t => {
+        const $item = $(`
+            <button type="button" class="list-group-item list-group-item-action">
+                <strong>${t.nom}</strong>
+                <span class="badge bg-secondary ms-1">${t.cin}</span>
+                ${t.cef ? `<span class="badge bg-info ms-1">CEF:${t.cef}</span>` : ''}
+                <span class="ms-2 text-muted small">${t.filiere}</span>
+            </button>
+        `);
+        $item.on('click', () => selectPromoteTrainee(t));
+        $res.append($item);
+    });
+});
+
+function selectPromoteTrainee(t) {
+    $('#prom-trainee-id').val(t.id);
+    $('#prom-name').text(t.nom);
+    $('#prom-cin').text(t.cin);
+    $('#prom-cef').text(t.cef || '—');
+    $('#prom-filiere').text(t.filiere);
+    $('#prom-group').text(t.group);
+    $('#prom-year').text(t.year);
+    $('#step-search').hide();
+    $('#step-confirm').show();
+    $('#btnConfirmPromote').show();
+}
+
+$('#btnChangeTrainee').on('click', function () {
+    $('#step-confirm').hide();
+    $('#step-search').show();
+    $('#btnConfirmPromote').hide();
+    $('#promoteSearchInput').val('').focus();
+});
+
+// Confirm promotion with file uploads
 $('#btnConfirmPromote').on('click', function () {
-    const traineeId = $('#selectTraineePromote').val();
-    if (!traineeId) return;
-    const $btn = $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> En cours...');
+    const traineeId = $('#prom-trainee-id').val();
+    if (!traineeId) { toastr.warning("Aucun stagiaire sélectionné !"); return; }
+
+    const $btn = $(this).prop('disabled', true).html('<img src="/images/ofppt_logo.png" style="height:22px;width:22px;object-fit:contain;animation:spin 1s linear infinite;border-radius:50%;"> En cours...');
+
+    const fd = new FormData();
+    fd.append('_token', '{{ csrf_token() }}');
+    ['scan_bac','scan_diplome','scan_attestation','scan_bulletin'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.files[0]) fd.append(id, el.files[0]);
+    });
+    const sig = document.getElementById('prom-signature');
+    if (sig && sig.files[0]) fd.append('signature_file', sig.files[0]);
 
     $.ajax({
-        url: `/trainees/${traineeId}/promouvoir`,
+        url: `/diplomes-prets/${traineeId}/check-promote`,
         method: 'POST',
-        data: {
-            _token: '{{ csrf_token() }}'
-        }
+        data: fd,
+        processData: false,
+        contentType: false,
     })
-    .done(() => {
-        toastr.success('Stagiaire promu en Diplômé avec succès !');
+    .done(res => {
+        toastr.success(res.message || 'Stagiaire promu en Diplômé avec succès !');
         $('#modalPromouvoir').modal('hide');
-        setTimeout(() => location.reload(), 1000);
+        setTimeout(() => location.reload(), 1200);
     })
     .fail(xhr => {
         const msg = xhr.responseJSON?.message ?? 'Erreur serveur.';
         toastr.error(msg);
-        $('#promoteResult')
-            .html(`<div class="alert alert-danger py-2"><i class="fas fa-times-circle"></i> ${msg}</div>`)
-            .show();
+        $('#promoteResult').html(`<div class="alert alert-danger py-2"><i class="fas fa-times-circle"></i> ${msg}</div>`).show();
     })
     .always(() => $btn.prop('disabled', false).html('<i class="fas fa-check"></i> Confirmer la promotion'));
 });
 
-// ── Promotion ──
+// Inline "Retirer documents" btn
 $(document).on('click', '.btn-promote', function () {
-    const id   = $(this).data('id');
-    const $btn = $(this);
-    if (!confirm('Vérifier et promouvoir ce stagiaire ?')) return;
+    const id = $(this).data('id');
+    if (!confirm('Voulez-vous retirer tous les documents pour ce stagiaire ?')) return;
     $.post(`/diplomes-prets/${id}/check-promote`, { _token: '{{ csrf_token() }}' })
-        .done(res => {
-            if (res.success) {
-                toastr.success(res.message);
-                $btn.replaceWith('<span class="badge badge-success mt-1"><i class="fas fa-check-circle"></i> Complet</span>');
-            } else {
-                toastr.warning(res.message);
-            }
-        })
+        .done(res => { toastr.success(res.message); setTimeout(() => location.reload(), 1000); })
         .fail(() => toastr.error('Erreur serveur.'));
 });
 

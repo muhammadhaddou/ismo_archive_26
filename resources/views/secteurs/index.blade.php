@@ -1,4 +1,4 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 @section('title', 'Secteurs')
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
@@ -38,7 +38,7 @@
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $secteur->nom_secteur }}</td>
                     <td>
-                        <span class="badge badge-info">{{ $secteur->filieres_count }}</span>
+                        <span class="badge bg-info">{{ $secteur->filieres_count }}</span>
                     </td>
                     <td>
                         <a href="{{ route('secteurs.edit', $secteur) }}" class="btn btn-sm btn-warning">

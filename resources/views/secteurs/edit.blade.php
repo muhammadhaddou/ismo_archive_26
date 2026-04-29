@@ -1,4 +1,4 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 @section('title', 'Modifier secteur')
 @section('content_header')
     <h1><i class="fas fa-edit"></i> Modifier — {{ $secteur->nom_secteur }}</h1>

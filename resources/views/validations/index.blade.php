@@ -1,14 +1,14 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 @section('title', 'Registre des validations')
 
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <h1><i class="fas fa-check-double"></i> Registre des validations</h1>
         <div>
-            <span class="badge badge-success mr-2" style="font-size:13px">
+            <span class="badge bg-success me-2" style="font-size:13px">
                 <i class="fas fa-check-circle"></i> {{ $totalValides }} validés
             </span>
-            <span class="badge badge-info" style="font-size:13px">
+            <span class="badge bg-info" style="font-size:13px">
                 <i class="fas fa-users"></i> {{ $trainees->total() }} stagiaires
             </span>
         </div>
@@ -19,7 +19,7 @@
 
 {{-- Filtres --}}
 <div class="card mb-3">
-    <div class="card-header bg-light">
+    <div class="card-header">
         <h3 class="card-title"><i class="fas fa-filter"></i> Filtres</h3>
     </div>
     <div class="card-body">
@@ -68,7 +68,7 @@
                     </select>
                 </div>
                 <div class="col-md-3 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary mr-2">
+                    <button type="submit" class="btn btn-primary me-2">
                         <i class="fas fa-filter"></i> Filtrer
                     </button>
                     <a href="{{ route('validations.index') }}" class="btn btn-secondary">
@@ -108,11 +108,11 @@
                     $val  = $trainee->validation;
 
                     $statusConfig = [
-                        'Remis'     => ['class' => 'badge-success',   'icon' => 'fa-check',        'label' => 'Remis'],
-                        'Final_Out' => ['class' => 'badge-danger',    'icon' => 'fa-sign-out-alt', 'label' => 'Définitif'],
-                        'Temp_Out'  => ['class' => 'badge-warning',   'icon' => 'fa-clock',        'label' => 'Temp.'],
-                        'Stock'     => ['class' => 'badge-secondary', 'icon' => 'fa-archive',      'label' => 'Stock'],
-                        'Ecoule'    => ['class' => 'badge-dark',      'icon' => 'fa-hourglass-end','label' => 'Écoulé'],
+                        'Remis'     => ['class' => 'bg-success',   'icon' => 'fa-check',        'label' => 'Remis'],
+                        'Final_Out' => ['class' => 'bg-danger',    'icon' => 'fa-sign-out-alt', 'label' => 'Définitif'],
+                        'Temp_Out'  => ['class' => 'bg-warning',   'icon' => 'fa-clock',        'label' => 'Temp.'],
+                        'Stock'     => ['class' => 'bg-secondary', 'icon' => 'fa-archive',      'label' => 'Stock'],
+                        'Ecoule'    => ['class' => 'bg-dark',      'icon' => 'fa-hourglass-end','label' => 'Écoulé'],
                     ];
                 @endphp
                 <tr>
@@ -123,7 +123,7 @@
                         </a>
                     </td>
                     <td>
-                        <span class="badge badge-light border">{{ $trainee->cin }}</span>
+                        <span class="badge bg-light border">{{ $trainee->cin }}</span>
                         @if($trainee->cef)
                             <br><small class="text-muted">{{ $trainee->cef }}</small>
                         @endif
@@ -142,7 +142,7 @@
                     @endphp
                     <td class="text-center">
                         @if(!$doc)
-                            <span class="badge badge-light border text-danger"
+                            <span class="badge bg-light border text-danger"
                                   title="Non enregistré">
                                 <i class="fas fa-times"></i>
                             </span>
@@ -168,12 +168,12 @@
                     {{-- Validation --}}
                     <td class="text-center">
                         @if($val)
-                            <span class="badge badge-success">
+                            <span class="badge bg-success">
                                 <i class="fas fa-check-double"></i>
                                 {{ \Carbon\Carbon::parse($val->date_validation)->format('d/m/Y') }}
                             </span>
                         @else
-                            <span class="badge badge-light border text-muted">
+                            <span class="badge bg-light border text-muted">
                                 <i class="fas fa-minus"></i> Non validé
                             </span>
                         @endif

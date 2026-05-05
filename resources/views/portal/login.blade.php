@@ -237,6 +237,12 @@
             <div class="login-card">
                 <h6 class="font-weight-bold mb-3 text-center">Connexion à votre espace</h6>
                 
+                @if(session('success'))
+                    <div class="alert alert-success text-center p-2 mb-3">
+                        <i class="fas fa-check-circle"></i> {{ session('success') }}
+                    </div>
+                @endif
+                
                 @if(session('error'))
                     <div class="alert alert-danger text-center p-2 mb-3">
                         <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
@@ -255,16 +261,6 @@
                         </div>
                     </div>
 
-                    <div class="form-group mb-2">
-                        <label class="small text-muted font-weight-bold">Date de naissance</label>
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
-                            </div>
-                            <input type="date" name="date_naissance" class="form-control border-left-0" required>
-                        </div>
-                    </div>
-
                     <div class="form-group mb-3">
                         <label class="small text-muted font-weight-bold">Mot de passe (CIN)</label>
                         <div class="input-group">
@@ -278,7 +274,44 @@
                     <button type="submit" class="btn btn-primary-custom w-100 text-white">
                         EXPLOREZ VOTRE ESPACE <i class="fas fa-arrow-right ms-2"></i>
                     </button>
+
+                    <div class="mt-3 text-center">
+                        <a href="#" data-toggle="modal" data-target="#forgotPasswordModal" class="small text-muted font-weight-bold"><i class="fas fa-key"></i> Mot de passe oublié ?</a>
+                    </div>
                 </form>
+            </div>
+
+            <!-- Forgot Password Modal -->
+            <div class="modal fade" id="forgotPasswordModal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <form action="{{ route('trainee.password.request') }}" method="POST">
+                        @csrf
+                        <div class="modal-content border-0" style="border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                            <div class="modal-header border-0 pb-0">
+                                <h5 class="modal-title font-weight-bold text-primary"><i class="fas fa-key"></i> Réinitialiser le mot de passe</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="small text-muted mb-4">Veuillez entrer vos informations pour envoyer une demande de réinitialisation à l'administration.</p>
+                                
+                                <div class="form-group mb-3">
+                                    <label class="small font-weight-bold">Numéro CEF</label>
+                                    <input type="text" name="cef" class="form-control" placeholder="Ex: Z123456" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label class="small font-weight-bold">Date de naissance</label>
+                                    <input type="date" name="date_naissance" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="modal-footer border-0 pt-0">
+                                <button type="button" class="btn btn-light rounded-pill px-4" data-dismiss="modal">Annuler</button>
+                                <button type="submit" class="btn btn-primary-custom rounded-pill px-4">Envoyer la demande</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
 

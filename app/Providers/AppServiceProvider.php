@@ -29,15 +29,18 @@ class AppServiceProvider extends ServiceProvider
         // Badge عدد الـ Temp-Out المنتهية
         View::composer('*', function ($view) {
             if (Auth::check()) {
-
-                $expiredBacCount = Document::where('type', 'Bac')
-                    ->where('status', 'Temp_Out')
-                    ->whereHas('movements', function ($q) {
-                        $q->where('action_type', 'Sortie')
-                          ->whereNotNull('deadline')
-                          ->where('deadline', '<', now());
-                    })
-                    ->count();
+                static $expiredBacCount = null;
+                
+                if ($expiredBacCount === null) {
+                    $expiredBacCount = Document::where('type', 'Bac')
+                        ->where('status', 'Temp_Out')
+                        ->whereHas('movements', function ($q) {
+                            $q->where('action_type', 'Sortie')
+                              ->whereNotNull('deadline')
+                              ->where('deadline', '<', now());
+                        })
+                        ->count();
+                }
 
                 $view->with('expiredBacCount', $expiredBacCount);
             }

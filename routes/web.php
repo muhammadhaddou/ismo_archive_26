@@ -120,6 +120,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('admin/settings/availability', [App\Http\Controllers\AdminSettingsController::class, 'index'])->name('admin.settings.availability');
     Route::post('admin/settings/availability', [App\Http\Controllers\AdminSettingsController::class, 'update'])->name('admin.settings.availability.update');
 
+    // Admin Password Requests
+    Route::get('admin/password-requests', [App\Http\Controllers\AdminPasswordRequestController::class, 'index'])->name('admin.password_requests.index');
+    Route::post('admin/password-requests/{docRequest}/approve', [App\Http\Controllers\AdminPasswordRequestController::class, 'approve'])->name('admin.password_requests.approve');
+    Route::post('admin/password-requests/{docRequest}/reject', [App\Http\Controllers\AdminPasswordRequestController::class, 'reject'])->name('admin.password_requests.reject');
+
 });
 //Tableau de bord par filière
 Route::get('filieres/{filiere}/stats', [FiliereStatsController::class, 'index'])->name('filieres.stats');
@@ -128,6 +133,7 @@ Route::get('filieres/{filiere}/stats', [FiliereStatsController::class, 'index'])
 Route::prefix('espace-stagiaire')->name('trainee.')->group(function () {
     Route::get('login', [App\Http\Controllers\TraineeAuthController::class, 'showLoginForm'])->name('login');
     Route::post('login', [App\Http\Controllers\TraineeAuthController::class, 'login']);
+    Route::post('password-request', [App\Http\Controllers\TraineeAuthController::class, 'requestPasswordReset'])->name('password.request');
     
     Route::middleware(['auth.trainee'])->group(function () {
         Route::get('password/setup', [App\Http\Controllers\TraineeAuthController::class, 'showPasswordSetupForm'])->name('password.setup');

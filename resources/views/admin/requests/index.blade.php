@@ -7,11 +7,18 @@
 @stop
 
 @section('content')
-<div class="card card-primary card-outline shadow">
-    <div class="card-header">
-        <h3 class="card-title">Toutes les demandes reçues</h3>
+<div class="card card-primary card-outline card-outline-tabs shadow">
+    <div class="card-header p-0 border-bottom-0">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active font-weight-bold" href="{{ route('admin.requests.index') }}"><i class="fas fa-file-alt"></i> Demandes de documents</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-muted" href="{{ route('admin.password_requests.index') }}"><i class="fas fa-key"></i> Changements de mot de passe</a>
+            </li>
+        </ul>
     </div>
-    <div class="card-body table-responsive p-0">
+    <div class="card-body table-responsive p-0 mt-2">
         <table class="table table-hover text-nowrap">
             <thead>
                 <tr>
@@ -37,6 +44,8 @@
                                 <span class="badge bg-warning"><i class="fas fa-graduation-cap"></i> Bac</span>
                             @elseif($req->document_type == 'Diplome')
                                 <span class="badge bg-info"><i class="fas fa-scroll"></i> Diplôme</span>
+                            @elseif($req->document_type == 'Certificat de scolarité')
+                                <span class="badge bg-primary"><i class="fas fa-file-signature"></i> Certificat</span>
                             @else
                                 <span class="badge bg-secondary">{{ $req->document_type }}</span>
                             @endif

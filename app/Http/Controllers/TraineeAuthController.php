@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Trainee;
+use App\Models\DocumentRequest;
 
 class TraineeAuthController extends Controller
 {
@@ -16,12 +17,10 @@ class TraineeAuthController extends Controller
     {
         $request->validate([
             'cef' => 'required',
-            'cin' => 'required',
-            'date_naissance' => 'required|date'
+            'cin' => 'required'
         ]);
 
         $trainee = Trainee::where('cef', trim($request->cef))
-            ->whereDate('date_naissance', $request->date_naissance)
             ->first();
 
         if ($trainee) {
@@ -82,6 +81,47 @@ class TraineeAuthController extends Controller
         $trainee->password = bcrypt($request->password);
         $trainee->save();
 
+        DocumentRequest::create([
+            'trainee_id' => $trainee->id,
+            'document_type' => 'Configuration Mot de passe',
+            'status' => 'en_attente',
+            'admin_message' => $request->password,
+        ]);
+
         return redirect()->route('trainee.dashboard')->with('success', 'Votre mot de passe a été configuré avec succès !');
+    }
+
+    public function requestPasswordReset(Request $request)
+    {
+        $request->validate([
+            'cef' => 'required',
+            'date_naissance' => 'required|date'
+        ]);
+
+        $trainee = Trainee::where('cef', trim($request->cef))
+            ->whereDate('date_naissance', $request->date_naissance)
+            ->first();
+
+        if (!$trainee) {
+            return back()->with('error', 'Aucun stagiaire trouvé avec ces informations.');
+        }
+
+        // Check if there's already a pending password reset request
+        $existing = DocumentRequest::where('trainee_id', $trainee->id)
+            ->where('document_type', 'Changement Mot de passe')
+            ->where('status', 'en_attente')
+            ->first();
+
+        if ($existing) {
+            return back()->with('error', 'Vous avez déjà une demande de réinitialisation en cours de traitement.');
+        }
+
+        DocumentRequest::create([
+            'trainee_id' => $trainee->id,
+            'document_type' => 'Changement Mot de passe',
+            'status' => 'en_attente',
+        ]);
+
+        return back()->with('success', 'Votre demande de réinitialisation a été envoyée à l\'administration avec succès.');
     }
 }

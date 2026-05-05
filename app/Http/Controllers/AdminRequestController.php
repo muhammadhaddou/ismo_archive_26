@@ -12,12 +12,15 @@ class AdminRequestController extends Controller
     public function index()
     {
         $requests = DocumentRequest::with('trainee.filiere')
+            ->whereNotIn('document_type', ['Changement Mot de passe', 'Configuration Mot de passe'])
             ->orderByRaw("CASE WHEN status = 'en_attente' THEN 1 ELSE 0 END DESC")
             ->orderBy('created_at', 'desc')
             ->get();
             
         // Mark as read when admin visits the inbox
-        DocumentRequest::where('is_read_by_admin', false)->update(['is_read_by_admin' => true]);
+        DocumentRequest::where('is_read_by_admin', false)
+            ->whereNotIn('document_type', ['Changement Mot de passe', 'Configuration Mot de passe'])
+            ->update(['is_read_by_admin' => true]);
 
         return view('admin.requests.index', compact('requests'));
     }
@@ -70,10 +73,10 @@ class AdminRequestController extends Controller
         return back()->with('error', 'La demande a été rejetée.');
     }
 
-    // API to check for new requests (poll)
     public function checkNew()
     {
         $newCount = DocumentRequest::where('is_read_by_admin', false)
+            ->whereNotIn('document_type', ['Changement Mot de passe', 'Configuration Mot de passe'])
             ->where('created_at', '>=', now()->subMinute())
             ->count();
 

@@ -103,6 +103,7 @@
                                             <option value="Diplome">Diplôme</option>
                                             <option value="Attestation">Attestation de réussite</option>
                                             <option value="Bulletin">Bulletin de notes</option>
+                                            <option value="Certificat de scolarité">Certificat de scolarité</option>
                                         </select>
                                     </div>
                                     
@@ -229,6 +230,10 @@
             'Bulletin': {
                 text: "<strong>Conditions Bulletin de notes :</strong><br>Le bulletin est délivré à la fin de chaque semestre après les délibérations officielles.",
                 icon: "fa-list-alt"
+            },
+            'Certificat de scolarité': {
+                text: "<strong>Conditions Certificat de scolarité :</strong><br>Vous serez convoqué(e) par l'administration pour récupérer votre certificat.",
+                icon: "fa-file-signature"
             }
         };
 

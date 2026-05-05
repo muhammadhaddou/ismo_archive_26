@@ -9,6 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler.min.css" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler-vendors.min.css" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"/>
     <style>
       @import url('https://rsms.me/inter/inter.css');
       :root {
@@ -153,6 +154,12 @@
                       <span class="nav-link-title">Demandes App <span class="badge bg-blue ms-auto">New</span></span>
                   </a>
               </li>
+              <li class="nav-item {{ request()->routeIs('admin.password_requests.*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ route('admin.password_requests.index') }}">
+                      <span class="nav-link-icon"><i class="fas fa-key"></i></span>
+                      <span class="nav-link-title">Mots de passe</span>
+                  </a>
+              </li>
               <li class="nav-item {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ route('admin.settings.availability') }}">
                       <span class="nav-link-icon"><i class="fas fa-cog"></i></span>
@@ -231,6 +238,7 @@
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     
     <!-- Bootstrap 4 to 5 polyfill helpers (simplistic) -->
     <script>

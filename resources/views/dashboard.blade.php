@@ -28,7 +28,7 @@
                     <li><hr class="dropdown-divider"></li>
                     <li><h6 class="dropdown-header text-uppercase">Documents</h6></li>
                     <li><a class="dropdown-item py-2" href="{{ route('documents.create') }}?type=Bac"><i class="fas fa-graduation-cap text-warning me-3 w-4"></i> Nouveau Retrait Bac</a></li>
-                    <li><a class="dropdown-item py-2" href="{{ route('documents.create') }}?type=Diplome"><i class="fas fa-scroll text-info me-3 w-4"></i> Nouvelle Remise Diplôme</a></li>
+                    <li><a class="dropdown-item py-2" href="{{ route('diplomes.prets') }}"><i class="fas fa-scroll text-info me-3 w-4"></i> Nouvelle Remise Diplôme</a></li>
                 </ul>
             </div>
         </div>
@@ -351,7 +351,7 @@
                 labels: ['J-6', 'J-5', 'J-4', 'J-3', 'J-2', 'Hier', 'Auj.'],
                 datasets: [{
                     label: 'Mouvements',
-                    data: [12, 19, 15, 25, 22, 30, {{ $stats['mouvements_today'] > 0 ? $stats['mouvements_today'] : 35 }}],
+                    data: @json($chart_data),
                     borderColor: '#206bc4',
                     backgroundColor: gradientStroke,
                     borderWidth: 3,

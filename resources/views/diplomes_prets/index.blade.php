@@ -146,7 +146,7 @@
                         @if($t->validation)
                             <span class="badge bg-success">
                                 <i class="fas fa-check-double"></i>
-                                {{ $t->validation->date_validation->format('d/m/Y') }}
+                                {{ \Carbon\Carbon::parse($t->validation->date_validation)->format('d/m/Y') }}
                             </span>
                         @else
                             <a href="{{ route('validations.create', $t) }}" class="btn btn-sm btn-outline-success">
@@ -537,6 +537,8 @@ $('#btnConfirmPromote').on('click', function () {
         data: fd,
         processData: false,
         contentType: false,
+        dataType: 'json',
+        headers: { 'Accept': 'application/json' }
     })
     .done(res => {
         toastr.success(res.message || 'Stagiaire promu en Diplômé avec succès !');

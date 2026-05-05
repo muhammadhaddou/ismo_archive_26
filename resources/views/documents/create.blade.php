@@ -303,13 +303,13 @@ function searchTrainees() {
         results.slice(0, 20).forEach(function(t) {
             var item = document.createElement('button');
             item.type = 'button';
-            item.className = 'list-group-item list-group-item-action py-2';
+            item.className = 'list-group-item list-group-item-action py-2 trainee-suggestion-btn';
+            item.setAttribute('data-id', t.id);
             item.innerHTML =
                 '<strong>' + t.nom + '</strong>' +
                 '<span class="ms-2 badge bg-secondary">' + t.cin + '</span>' +
                 (t.cef ? '<span class="ms-1 badge bg-info">CEF: ' + t.cef + '</span>' : '') +
                 (t.filiere ? '<span class="ms-1 text-muted small"> | ' + t.filiere + '</span>' : '');
-            item.onclick = function() { selectTrainee(t); };
             container.appendChild(item);
         });
 
@@ -320,6 +320,17 @@ function searchTrainees() {
 
     container.style.display = 'block';
 }
+
+// Utiliser l'event delegation avec mousedown pour éviter les conflits de focus
+document.getElementById('trainee-results').addEventListener('mousedown', function(e) {
+    var btn = e.target.closest('.trainee-suggestion-btn');
+    if (btn) {
+        e.preventDefault(); // Empêche la perte de focus de l'input si nécessaire
+        var t_id = btn.getAttribute('data-id');
+        var t = trainees.find(x => x.id == t_id);
+        if (t) selectTrainee(t);
+    }
+});
 
 function selectTrainee(t) {
     document.getElementById('trainee_id_hidden').value = t.id;

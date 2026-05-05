@@ -44,6 +44,7 @@ class DiplomesPrêtsController extends Controller
 
     public function checkAndPromote(Request $request, $traineeId)
     {
+        \Log::info("checkAndPromote STARTED for trainee: " . $traineeId);
         $trainee = Trainee::with('documents')->findOrFail($traineeId);
 
         // 1. Promouvoir le stagiaire
@@ -127,6 +128,8 @@ class DiplomesPrêtsController extends Controller
                 'signature_scan' => $sigPath,
             ]);
         }
+
+        \Log::info("checkAndPromote FINISHED for trainee: " . $traineeId);
 
         return response()->json([
             'success' => true,

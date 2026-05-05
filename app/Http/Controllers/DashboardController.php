@@ -103,12 +103,21 @@ class DashboardController extends Controller
             ->latest()
             ->get();
 
+        // 🔹 Activité des documents (Mouvements des 7 derniers jours)
+        $chart_data = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i)->format('Y-m-d');
+            $count = Movement::whereDate('date_action', $date)->count();
+            $chart_data[] = $count;
+        }
+
         // 🔹 Return view
         return view('dashboard', compact(
             'stats',
             'recent_movements',
             'bac_alerts',
-            'ecouleDocs'
+            'ecouleDocs',
+            'chart_data'
         ));
     }
 }

@@ -5,12 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\DocumentRequest;
 use App\Models\DocumentAvailability;
+use Illuminate\Support\Facades\View;
 
 class TraineePortalController extends Controller
 {
     public function dashboard(Request $request)
     {
-        $trainee = \View::shared('currentTrainee');
+        $trainee = View::shared('currentTrainee');
         
         $requests = DocumentRequest::where('trainee_id', $trainee->id)
             ->orderBy('created_at', 'desc')
@@ -25,11 +26,11 @@ class TraineePortalController extends Controller
     public function storeRequest(Request $request)
     {
         $request->validate([
-            'document_type' => 'required|string|in:Bac,Diplome,Attestation,Bulletin',
+            'document_type' => 'required|string|in:Bac,Diplome,Attestation,Bulletin,Certificat de scolarité',
             'bac_type' => 'nullable|string'
         ]);
 
-        $trainee = \View::shared('currentTrainee');
+        $trainee = View::shared('currentTrainee');
         
         $finalType = $request->document_type;
         if ($finalType === 'Bac' && $request->filled('bac_type')) {

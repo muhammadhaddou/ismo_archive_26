@@ -29,7 +29,7 @@ class TraineesImport implements SkipsEmptyRows, ToModel, WithHeadingRow, WithChu
 
         $filiereCode = $this->pick($row, ['codediplome', 'filiere']);
         $filiere = $filiereCode
-            ? Filiere::where('code_filiere', $filiereCode)->first()
+            ? Filiere::query()->where('code_filiere', '=', $filiereCode)->first()
             : null;
 
         $filiereId = $filiere?->id ?? 1; // default filiere
@@ -77,6 +77,16 @@ class TraineesImport implements SkipsEmptyRows, ToModel, WithHeadingRow, WithChu
             'nom_arabe' => $this->pick($row, ['nom_arabe']),
             'prenom_arabe' => $this->pick($row, ['prenom_arabe']),
             'niveau_scolaire' => $this->pick($row, ['niveauscolaire']),
+            
+            // Nouvelles colonnes récemment ajoutées
+            'cin_pere' => $this->pick($row, ['cin_pere', 'cinpere']),
+            'cin_mere' => $this->pick($row, ['cin_mere', 'cinmere']),
+            'image_profile' => $this->pick($row, ['image_profile', 'imageprofile', 'photo']),
+            'cin_scan' => $this->pick($row, ['cin_scan', 'cinscan']),
+            'cin_pere_scan' => $this->pick($row, ['cin_pere_scan', 'cinperescan']),
+            'cin_mere_scan' => $this->pick($row, ['cin_mere_scan', 'cinmerescan']),
+            'statut' => $this->pick($row, ['statut']) ?? 'en_formation',
+            'password' => $this->pick($row, ['password', 'mot_de_passe']),
         ];
 
         Trainee::updateOrCreate(['cin' => $cin], $data);
@@ -84,7 +94,7 @@ class TraineesImport implements SkipsEmptyRows, ToModel, WithHeadingRow, WithChu
         return null;
     }
 
-    private function pick($row, $keys)
+    private function pick(array $row, array $keys)
     {
         foreach ($keys as $k) {
             if (!empty($row[$k])) return trim($row[$k]);
@@ -92,19 +102,19 @@ class TraineesImport implements SkipsEmptyRows, ToModel, WithHeadingRow, WithChu
         return null;
     }
 
-    private function date($v)
+    private function date(mixed $v)
     {
         if (!$v) return null;
         if (is_numeric($v)) return ExcelDate::excelToDateTimeObject($v)->format('Y-m-d');
         return Carbon::parse($v)->format('Y-m-d');
     }
 
-    private function bool($v)
+    private function bool(mixed $v)
     {
         return in_array(strtolower($v), ['oui','yes','1']) ? 1 : 0;
     }
 
-    private function year($row)
+    private function year(array $row)
     {
         $y = $this->pick($row, ['annee']);
         return $y ? (int)$y : date('Y');

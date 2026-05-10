@@ -14,6 +14,15 @@ class TraineeController extends Controller
     public function index(Request $request)
     {
         $trainees = Trainee::with(['filiere', 'documents'])
+            ->where(function($q) {
+                // Exclure les diplômés (Diplôme Final_Out)
+                $q->where('statut', '!=', 'diplome')
+                  ->orWhereNull('statut');
+            })
+            // Exclure les stagiaires dont le Bac a été retiré définitivement
+            ->whereDoesntHave('documents', function($q) {
+                $q->where('type', 'Bac')->where('status', 'Final_Out');
+            })
             ->when($request->filled('search'), function ($query) use ($request) {
                 $query->where(function($q) use ($request) {
                     $q->where('cin', 'like', '%' . $request->search . '%')
@@ -143,7 +152,7 @@ class TraineeController extends Controller
 
     public function destroy(Trainee $trainee)
     {
-        $trainee->delete();
+        Trainee::destroy($trainee->id);
         return redirect()->route('trainees.index')
                          ->with('success', 'Stagiaire supprimé ✅');
     }
@@ -182,5 +191,58 @@ class TraineeController extends Controller
         $filename = sprintf('rapport_%s_%s.pdf', $trainee->cin, now()->format('Ymd'));
 
         return $pdf->download($filename);
+    }
+
+    /**
+     * Liste des stagiaires dont le BAC a été retiré définitivement.
+     * Inclut le signataire et les causes de retrait.
+     */
+    public function bacFinalOut(Request $request)
+    {
+        $filieres = Filiere::orderBy('code_filiere', 'asc')->get();
+        $groups   = Trainee::select('group')->distinct()->orderBy('group')->pluck('group');
+        $years    = Trainee::select('graduation_year')->distinct()->orderByDesc('graduation_year')->pluck('graduation_year');
+
+        // Récupérer les documents Bac Final_Out avec toutes les relations nécessaires
+        // EXCLURE les diplômés — détectés par :
+        //   1. statut = 'diplome' (le plus fiable)
+        //   2. OU Diplôme avec status 'Remis' ou 'Final_Out'
+        $documents = \App\Models\Document::with([
+                'trainee.filiere',
+                'movements.user',
+            ])
+            ->where('type', 'Bac')
+            ->where('status', 'Final_Out')
+            ->whereHas('trainee', function($q) {
+                // Exclure les diplômés (statut direct)
+                $q->where(function($q) {
+                    $q->where('statut', '!=', 'diplome')
+                      ->orWhereNull('statut');
+                })
+                // Exclure aussi ceux qui ont un Diplôme remis (Remis ou Final_Out)
+                ->whereDoesntHave('documents', fn($q) =>
+                    $q->where('type', 'Diplome')
+                      ->whereIn('status', ['Final_Out', 'Remis'])
+                );
+            })
+            ->when($request->filled('search'), fn($q) => $q->whereHas('trainee', fn($q) =>
+                $q->where('last_name',  'like', '%'.$request->search.'%')
+                  ->orWhere('first_name','like', '%'.$request->search.'%')
+                  ->orWhere('cin',       'like', '%'.$request->search.'%')
+            ))
+            ->when($request->filled('filiere_id'), fn($q) => $q->whereHas('trainee', fn($q) =>
+                $q->where('filiere_id', $request->filiere_id)
+            ))
+            ->when($request->filled('group'), fn($q) => $q->whereHas('trainee', fn($q) =>
+                $q->where('group', $request->group)
+            ))
+            ->when($request->filled('graduation_year'), fn($q) => $q->whereHas('trainee', fn($q) =>
+                $q->where('graduation_year', $request->graduation_year)
+            ))
+            ->latest()
+            ->paginate(20)
+            ->withQueryString();
+
+        return view('trainees.bac-final-out', compact('documents', 'filieres', 'groups', 'years'));
     }
 }

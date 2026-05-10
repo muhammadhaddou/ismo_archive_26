@@ -41,6 +41,25 @@ class AdminRequestController extends Controller
         $email = $docRequest->trainee->cef . '@ofppt-edu.ma';
         Mail::to($email)->send(new DocumentReadyNotification($docRequest));
 
+        // Envoi SMS via Twilio
+        if ($docRequest->trainee->phone && env('TWILIO_SID') && env('TWILIO_TOKEN') && env('TWILIO_FROM')) {
+            try {
+                $twilio = new \Twilio\Rest\Client(env('TWILIO_SID'), env('TWILIO_TOKEN'));
+                $message = "ISMO Archive : Votre demande pour le document {$docRequest->document_type} a été acceptée. Rendez-vous fixé au " . \Carbon\Carbon::parse($request->appointment_date)->format('d/m/Y à H:i') . ".";
+                
+                $twilio->messages->create(
+                    $docRequest->trainee->phone,
+                    [
+                        "from" => env('TWILIO_FROM'),
+                        "body" => $message
+                    ]
+                );
+            } catch (\Exception $e) {
+                // Log l'erreur pour ne pas bloquer le processus d'acceptation
+                \Illuminate\Support\Facades\Log::error('Erreur Twilio SMS: ' . $e->getMessage());
+            }
+        }
+
         return back()->with('success', 'Le rendez-vous a été fixé et envoyé au stagiaire.');
     }
 

@@ -11,7 +11,7 @@ class ScanController extends Controller
     /**
      * Download or view a secure scan file
      */
-    public function show($path)
+    public function show(string $path)
     {
         // Path should start with 'documents_scans' or 'procurations'
         if (!preg_match('/^(documents_scans|procurations)\//', $path)) {

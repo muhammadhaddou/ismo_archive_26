@@ -19,7 +19,7 @@
                    class="btn btn-success me-2">
                     <i class="fas fa-check-circle"></i> Voir validation
                     <span class="badge bg-light">
-                        {{ $trainee->validation->date_validation->format('d/m/Y') }}
+                        {{ \Carbon\Carbon::parse($trainee->validation->date_validation)->format('d/m/Y') }}
                     </span>
                 </a>
             @endif
@@ -40,7 +40,7 @@
 @if($trainee->validation)
 <div class="alert alert-success">
     <i class="fas fa-check-double"></i>
-    <strong>Stagiaire validé le {{ $trainee->validation->date_validation->format('d/m/Y') }}</strong>
+    <strong>Stagiaire validé le {{ \Carbon\Carbon::parse($trainee->validation->date_validation)->format('d/m/Y') }}</strong>
     — par {{ $trainee->validation->user->name }}
 </div>
 @endif
@@ -135,8 +135,8 @@
                 ['prenom_2', 'Prénom 2', $trainee->prenom_2],
                 ['site', 'Site', $trainee->site],
                 ['regime_inscription', 'Régime inscription', $trainee->regime_inscription],
-                ['date_inscription', 'Date inscription', $trainee->date_inscription?->format('d/m/Y')],
-                ['date_dossier_complet', 'Date dossier complet', $trainee->date_dossier_complet?->format('d/m/Y')],
+                ['date_inscription', 'Date inscription', $trainee->date_inscription ? \Carbon\Carbon::parse($trainee->date_inscription)->format('d/m/Y') : null],
+                ['date_dossier_complet', 'Date dossier complet', $trainee->date_dossier_complet ? \Carbon\Carbon::parse($trainee->date_dossier_complet)->format('d/m/Y') : null],
                 ['lieu_naissance', 'Lieu naissance', $trainee->lieu_naissance],
                 ['motif_admission', 'Motif admission', $trainee->motif_admission],
                 ['tel_tuteur', 'Tél. tuteur', $trainee->tel_tuteur],
@@ -196,21 +196,21 @@
                                        ? 'border-warning bg-light'
                                        : 'border-secondary bg-light')) }}">
                             @if(!$doc)
-                                <i class="fas fa-times-circle fa-2x text-danger"></i>
-                                <p class="mb-0 mt-1 font-weight-bold text-danger">{{ $type }}</p>
-                                <small class="text-muted">Non enregistré</small>
+                                <i class="ti ti-file-plus fa-2x" style="font-size:2rem; color:#868e96;"></i>
+                                <p class="mb-0 mt-1 fw-bold" style="color:#495057;">{{ $type }}</p>
+                                <small class="text-muted">Non saisi dans le système</small>
                             @elseif(in_array($doc->status, ['Final_Out','Remis']))
-                                <i class="fas fa-check-circle fa-2x text-success"></i>
-                                <p class="mb-0 mt-1 font-weight-bold text-success">{{ $type }}</p>
-                                <small class="text-success">Remis</small>
+                                <i class="ti ti-circle-check-filled fa-2x text-success" style="font-size:2rem;"></i>
+                                <p class="mb-0 mt-1 fw-bold text-success">{{ $type }}</p>
+                                <small class="text-success">✅ Remis au stagiaire</small>
                             @elseif($doc->status == 'Temp_Out')
-                                <i class="fas fa-clock fa-2x text-warning"></i>
-                                <p class="mb-0 mt-1 font-weight-bold text-warning">{{ $type }}</p>
-                                <small class="text-warning">Retrait temp.</small>
+                                <i class="ti ti-hourglass fa-2x text-warning" style="font-size:2rem;"></i>
+                                <p class="mb-0 mt-1 fw-bold text-warning">{{ $type }}</p>
+                                <small class="text-warning">⏳ Retrait temporaire</small>
                             @else
-                                <i class="fas fa-archive fa-2x text-secondary"></i>
-                                <p class="mb-0 mt-1 font-weight-bold text-secondary">{{ $type }}</p>
-                                <small class="text-muted">En stock</small>
+                                <i class="ti ti-package fa-2x text-primary" style="font-size:2rem;"></i>
+                                <p class="mb-0 mt-1 fw-bold text-primary">{{ $type }}</p>
+                                <small class="text-primary">📦 En stock (archive)</small>
                             @endif
 
                             @if($doc)
@@ -284,7 +284,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($trainee->documents->flatMap->movements->sortByDesc('date_action') as $mv)
+                        @forelse($trainee->documents->flatMap->movements->sort(fn($a, $b) => $b->date_action <=> $a->date_action) as $mv)
                         <tr>
                             <td>
                                 <span class="badge bg-primary">

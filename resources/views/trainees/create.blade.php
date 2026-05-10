@@ -119,14 +119,18 @@
                         <select name="graduation_year" class="form-control @error('graduation_year') is-invalid @enderror">
                             <option value="">-- Choisir --</option>
                             @php
-                                $currentYear = date('Y');
+                                $currentYear = date('Y') + 2; // Années futures automatiques
                                 $years = [];
-                                for ($y = 2019; $y <= $currentYear; $y++) {
+                                for ($y = 2018; $y <= $currentYear; $y++) {
                                     $years[] = $y . '-' . ($y + 1);
                                 }
+                                rsort($years); // Tri décroissant (plus récent en haut)
+                                
+                                // Calculer l'année scolaire actuelle par défaut (ex: si on est en Octobre 2026 -> 2026-2027, si Février 2026 -> 2025-2026)
+                                $currentAcademicYear = date('n') >= 8 ? date('Y') . '-' . (date('Y') + 1) : (date('Y') - 1) . '-' . date('Y');
                             @endphp
-                            @foreach(array_reverse($years) as $yr)
-                                <option value="{{ $yr }}" {{ old('graduation_year', ($currentYear-1).'-'.$currentYear) == $yr ? 'selected' : '' }}>
+                            @foreach($years as $yr)
+                                <option value="{{ $yr }}" {{ old('graduation_year', $currentAcademicYear) == $yr ? 'selected' : '' }}>
                                     {{ $yr }}
                                 </option>
                             @endforeach

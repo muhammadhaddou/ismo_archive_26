@@ -8,6 +8,7 @@ use App\Models\Validation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class DiplomesPrêtsController extends Controller
 {
@@ -42,9 +43,9 @@ class DiplomesPrêtsController extends Controller
         ));
     }
 
-    public function checkAndPromote(Request $request, $traineeId)
+    public function checkAndPromote(Request $request, string|int $traineeId)
     {
-        \Log::info("checkAndPromote STARTED for trainee: " . $traineeId);
+        Log::info("checkAndPromote STARTED for trainee: " . $traineeId);
         $trainee = Trainee::with('documents')->findOrFail($traineeId);
 
         // 1. Promouvoir le stagiaire
@@ -129,7 +130,7 @@ class DiplomesPrêtsController extends Controller
             ]);
         }
 
-        \Log::info("checkAndPromote FINISHED for trainee: " . $traineeId);
+        Log::info("checkAndPromote FINISHED for trainee: " . $traineeId);
 
         return response()->json([
             'success' => true,
@@ -137,7 +138,7 @@ class DiplomesPrêtsController extends Controller
         ]);
     }
 
-    public function saveSignature(Request $request, $traineeId)
+    public function saveSignature(Request $request, string|int $traineeId)
     {
         $trainee = Trainee::findOrFail($traineeId);
         $filename = 'signatures/sig_' . $traineeId . '_' . time() . '.png';

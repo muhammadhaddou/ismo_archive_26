@@ -9,6 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler.min.css" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler-vendors.min.css" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"/>
     <style>
       @import url('https://rsms.me/inter/inter.css');
@@ -19,17 +20,25 @@
       	font-feature-settings: "cv03", "cv04", "cv11";
       }
       .nav-link-icon i {
-          font-size: 1.2rem;
+          font-size: 1.35rem;
           color: #6c7a91;
+          transition: color 0.2s ease-in-out, transform 0.2s ease-in-out;
       }
-      .nav-item.active .nav-link-icon i {
+      .nav-item.active .nav-link-icon i, .nav-item:hover .nav-link-icon i {
           color: #206bc4;
+          transform: scale(1.05);
       }
     </style>
     @yield('css')
+    <script>
+        // Appliquer le thème immédiatement pour éviter le flash blanc
+        (function() {
+            var t = localStorage.getItem('tablerTheme') || 'light';
+            document.documentElement.setAttribute('data-bs-theme', t);
+        })();
+    </script>
 </head>
 <body >
-    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler-theme.min.js"></script>
     <div class="page">
       <!-- Sidebar -->
       <aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark">
@@ -60,7 +69,7 @@
             <ul class="navbar-nav pt-lg-3">
               <li class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('dashboard') }}" >
-                  <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="fas fa-home"></i></span>
+                  <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-layout-dashboard"></i></span>
                   <span class="nav-link-title">Tableau de bord</span>
                 </a>
               </li>
@@ -68,20 +77,43 @@
               <li class="nav-item nav-category mt-4 mb-2 text-muted text-uppercase fw-bold" style="font-size: 10px; padding-left: 1rem; letter-spacing: 0.5px;">Stagiaires</li>
               <li class="nav-item {{ request()->routeIs('trainees.*') && !request()->routeIs('trainees.import') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ route('trainees.index') }}">
-                      <span class="nav-link-icon"><i class="fas fa-users"></i></span>
+                      <span class="nav-link-icon"><i class="ti ti-users-group"></i></span>
                       <span class="nav-link-title">Liste Stagiaires</span>
                   </a>
               </li>
-              <li class="nav-item {{ request()->routeIs('diplomes.prets') ? 'active' : '' }}">
+              <li class="{{ request()->routeIs('diplomes.prets') ? 'active' : '' }} nav-item">
                   <a class="nav-link" href="{{ route('diplomes.prets') }}">
-                      <span class="nav-link-icon"><i class="fas fa-user-graduate"></i></span>
+                      <span class="nav-link-icon"><i class="ti ti-certificate"></i></span>
                       <span class="nav-link-title">Diplômés</span>
+                  </a>
+              </li>
+
+              <li class="nav-item {{ request()->routeIs('trainees.bac.final-out') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ route('trainees.bac.final-out') }}">
+                      <span class="nav-link-icon"><i class="ti ti-file-x text-danger"></i></span>
+                      <span class="nav-link-title">Retraits Bac Déf.
+                          @php
+                              // Abandons purs : Bac Final_Out SANS diplôme (statut ni Remis/Final_Out Diplôme)
+                              $bacFinalCount = \App\Models\Document::where('type','Bac')
+                                  ->where('status','Final_Out')
+                                  ->whereHas('trainee', function($q) {
+                                      $q->where(function($q) {
+                                          $q->where('statut', '!=', 'diplome')->orWhereNull('statut');
+                                      })->whereDoesntHave('documents', fn($q) =>
+                                          $q->where('type','Diplome')->whereIn('status',['Final_Out','Remis'])
+                                      );
+                                  })->count();
+                          @endphp
+                          @if($bacFinalCount > 0)
+                              <span class="badge bg-danger ms-auto">{{ $bacFinalCount }}</span>
+                          @endif
+                      </span>
                   </a>
               </li>
 
               <li class="nav-item {{ request()->routeIs('trainees.import') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ route('trainees.import') }}">
-                      <span class="nav-link-icon"><i class="fas fa-file-excel"></i></span>
+                      <span class="nav-link-icon"><i class="ti ti-file-upload"></i></span>
                       <span class="nav-link-title">Importer Excel</span>
                   </a>
               </li>
@@ -89,26 +121,26 @@
               <li class="nav-item nav-category mt-4 mb-2 text-muted text-uppercase fw-bold" style="font-size: 10px; padding-left: 1rem; letter-spacing: 0.5px;">Documents</li>
               <li class="nav-item dropdown {{ request()->is('documents/bac*') ? 'active' : '' }}">
                 <a class="nav-link dropdown-toggle" href="#navbar-bac" data-bs-toggle="dropdown" data-bs-auto-close="false" role="button" aria-expanded="{{ request()->is('documents/bac*') ? 'true' : 'false' }}" >
-                  <span class="nav-link-icon"><i class="fas fa-graduation-cap"></i></span>
+                  <span class="nav-link-icon"><i class="ti ti-school"></i></span>
                   <span class="nav-link-title">Baccalauréat</span>
                 </a>
                 <div class="dropdown-menu {{ request()->is('documents/bac*') ? 'show' : '' }}">
                   <a class="dropdown-item" href="{{ url('documents/bac') }}">Liste</a>
                   <a class="dropdown-item" href="{{ url('documents/bac/temp-out') }}">Retraits temp.</a>
                   <a class="dropdown-item text-danger" href="{{ url('documents/bac/ecoule') }}">Écoulé</a>
-                  <a class="dropdown-item" href="{{ url('documents/bac/final-out') }}">Retraits déf.</a>
+
                 </div>
               </li>
 
               <li class="nav-item {{ request()->routeIs('documents.bulletin') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ route('documents.bulletin') }}">
-                      <span class="nav-link-icon"><i class="fas fa-file-alt"></i></span>
+                      <span class="nav-link-icon"><i class="ti ti-report-analytics"></i></span>
                       <span class="nav-link-title">Bulletins</span>
                   </a>
               </li>
               <li class="nav-item {{ request()->routeIs('documents.attestation') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ route('documents.attestation') }}">
-                      <span class="nav-link-icon"><i class="fas fa-file-contract"></i></span>
+                      <span class="nav-link-icon"><i class="ti ti-file-certificate"></i></span>
                       <span class="nav-link-title">Attestations</span>
                   </a>
               </li>
@@ -116,19 +148,19 @@
               <li class="nav-item nav-category mt-4 mb-2 text-muted text-uppercase fw-bold" style="font-size: 10px; padding-left: 1rem; letter-spacing: 0.5px;">Mouvements</li>
               <li class="nav-item {{ request()->routeIs('movements.index') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ route('movements.index') }}">
-                      <span class="nav-link-icon"><i class="fas fa-history"></i></span>
+                      <span class="nav-link-icon"><i class="ti ti-history"></i></span>
                       <span class="nav-link-title">Historique</span>
                   </a>
               </li>
               <li class="nav-item {{ request()->routeIs('movements.today') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ route('movements.today') }}">
-                      <span class="nav-link-icon"><i class="fas fa-calendar-day"></i></span>
+                      <span class="nav-link-icon"><i class="ti ti-calendar-event"></i></span>
                       <span class="nav-link-title">Aujourd'hui</span>
                   </a>
               </li>
               <li class="nav-item {{ request()->routeIs('calendrier') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ route('calendrier') }}">
-                      <span class="nav-link-icon"><i class="fas fa-calendar-alt text-red"></i></span>
+                      <span class="nav-link-icon"><i class="ti ti-calendar-month text-red"></i></span>
                       <span class="nav-link-title">Calendrier</span>
                   </a>
               </li>
@@ -136,7 +168,7 @@
               <li class="nav-item nav-category mt-4 mb-2 text-muted text-uppercase fw-bold" style="font-size: 10px; padding-left: 1rem; letter-spacing: 0.5px;">Validations</li>
               <li class="nav-item {{ request()->routeIs('validations.*') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ route('validations.index') }}">
-                      <span class="nav-link-icon"><i class="fas fa-check-double"></i></span>
+                      <span class="nav-link-icon"><i class="ti ti-clipboard-check"></i></span>
                       <span class="nav-link-title">Registre</span>
                   </a>
               </li>
@@ -144,25 +176,20 @@
               <li class="nav-item nav-category mt-4 mb-2 text-muted text-uppercase fw-bold" style="font-size: 10px; padding-left: 1rem; letter-spacing: 0.5px;">Administration</li>
               <li class="nav-item {{ request()->routeIs('users.*') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ route('users.index') }}">
-                      <span class="nav-link-icon"><i class="fas fa-user-shield"></i></span>
+                      <span class="nav-link-icon"><i class="ti ti-shield-lock"></i></span>
                       <span class="nav-link-title">Utilisateurs</span>
                   </a>
               </li>
               <li class="nav-item {{ request()->routeIs('admin.requests.*') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ route('admin.requests.index') }}">
-                      <span class="nav-link-icon"><i class="fas fa-inbox"></i></span>
+                      <span class="nav-link-icon"><i class="ti ti-inbox"></i></span>
                       <span class="nav-link-title">Demandes App <span class="badge bg-blue ms-auto">New</span></span>
                   </a>
               </li>
-              <li class="nav-item {{ request()->routeIs('admin.password_requests.*') ? 'active' : '' }}">
-                  <a class="nav-link" href="{{ route('admin.password_requests.index') }}">
-                      <span class="nav-link-icon"><i class="fas fa-key"></i></span>
-                      <span class="nav-link-title">Mots de passe</span>
-                  </a>
-              </li>
+
               <li class="nav-item {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
                   <a class="nav-link" href="{{ route('admin.settings.availability') }}">
-                      <span class="nav-link-icon"><i class="fas fa-cog"></i></span>
+                      <span class="nav-link-icon"><i class="ti ti-settings"></i></span>
                       <span class="nav-link-title">Paramètres</span>
                   </a>
               </li>
@@ -178,15 +205,11 @@
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu" aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
-          <div class="navbar-nav flex-row order-md-last">
-            <div class="d-none d-md-flex">
-              <a href="#" onclick="event.preventDefault(); document.body.setAttribute('data-bs-theme', 'dark'); localStorage.setItem('tablerTheme', 'dark');" class="nav-link px-0 hide-theme-dark" title="Mode sombre" data-bs-toggle="tooltip" data-bs-placement="bottom">
-                <i class="fas fa-moon"></i>
-              </a>
-              <a href="#" onclick="event.preventDefault(); document.body.setAttribute('data-bs-theme', 'light'); localStorage.setItem('tablerTheme', 'light');" class="nav-link px-0 hide-theme-light" title="Mode clair" data-bs-toggle="tooltip" data-bs-placement="bottom">
-                <i class="fas fa-sun"></i>
-              </a>
-            </div>
+          <div class="navbar-nav flex-row order-md-last align-items-center gap-2">
+            <!-- Toggle Mode Clair/Sombre -->
+            <button id="theme-toggle" class="btn btn-sm btn-ghost-secondary" title="Changer le thème" style="width:36px;height:36px;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s;">
+                <i id="theme-icon" class="ti ti-moon fs-4"></i>
+            </button>
             <div class="nav-item dropdown ms-3">
               <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown" aria-label="Open user menu">
                 <span class="avatar avatar-sm" style="background-color: #206bc4; color: white;">{{ substr(Auth::user()->name ?? 'A', 0, 1) }}</span>
@@ -251,6 +274,37 @@
           $('[data-dismiss="modal"]').attr('data-bs-dismiss', 'modal');
           $('[data-toggle="dropdown"]').attr('data-bs-toggle', 'dropdown');
       });
+    </script>
+
+    <!-- Theme Toggle Script -->
+    <script>
+        (function() {
+            var icon = document.getElementById('theme-icon');
+            var btn  = document.getElementById('theme-toggle');
+            if (!btn) return;
+
+            // Mettre l'icône selon le thème actuel
+            function syncIcon() {
+                var current = document.documentElement.getAttribute('data-bs-theme');
+                if (current === 'dark') {
+                    icon.className = 'ti ti-sun fs-4';
+                    btn.style.color = '#f59f00';
+                } else {
+                    icon.className = 'ti ti-moon fs-4';
+                    btn.style.color = '';
+                }
+            }
+
+            syncIcon();
+
+            btn.addEventListener('click', function() {
+                var current = document.documentElement.getAttribute('data-bs-theme');
+                var next = current === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-bs-theme', next);
+                localStorage.setItem('tablerTheme', next);
+                syncIcon();
+            });
+        })();
     </script>
     @yield('js')
 </body>

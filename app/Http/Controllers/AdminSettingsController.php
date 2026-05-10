@@ -10,7 +10,7 @@ class AdminSettingsController extends Controller
     public function index()
     {
         $availabilities = DocumentAvailability::all()->keyBy('document_type');
-        $documentTypes = ['Bac', 'Diplome', 'Attestation', 'Bulletin'];
+        $documentTypes = ['Bac', 'Diplome', 'Attestation', 'Bulletin', 'Certificat Scolaire'];
         
         return view('admin.settings.index', compact('availabilities', 'documentTypes'));
     }

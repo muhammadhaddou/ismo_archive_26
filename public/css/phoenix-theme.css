@@ -8,9 +8,6 @@ body, .content-wrapper, .main-header, .main-sidebar, .card, .table, .btn {
 }
 
 /* --- Layout Backgrounds --- */
-.content-wrapper {
-    /* Removed for dark mode compatibility */
-}
 
 /* --- Navbar --- */
 .main-header.navbar {
@@ -19,12 +16,6 @@ body, .content-wrapper, .main-header, .main-sidebar, .card, .table, .btn {
 }
 
 /* --- Sidebar --- */
-.sidebar-light-primary {
-    /* Removed for dark mode compatibility */
-}
-.sidebar-light-primary .brand-link {
-    /* Removed for dark mode compatibility */
-}
 .sidebar-light-primary .nav-sidebar > .nav-item > .nav-link.active {
     background-color: #eaddc4; 
     color: #4338ca;

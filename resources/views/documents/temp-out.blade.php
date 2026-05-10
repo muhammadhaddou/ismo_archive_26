@@ -2,300 +2,254 @@
 @section('title', 'Retraits temporaires — Bac')
 
 @section('content_header')
-    <div class="d-flex justify-content-between align-items-center">
-        <h1><i class="fas fa-clock"></i> Bac — Retraits temporaires</h1>
-        <span class="badge bg-warning" style="font-size:14px">
-            {{ $documents->total() }} en cours
-        </span>
+<div class="d-flex justify-content-between align-items-center">
+    <div>
+        <div class="text-muted small text-uppercase fw-bold mb-1" style="letter-spacing:1px;">Baccalauréat</div>
+        <h2 class="fw-bold mb-0" style="font-size:1.6rem;">
+            <i class="ti ti-clock me-2 text-warning"></i>Retraits temporaires
+        </h2>
     </div>
+    <span class="badge bg-warning-lt text-warning fw-bold px-3 py-2" style="font-size:.95rem;">
+        <i class="ti ti-hourglass me-1"></i>{{ $documents->total() }} en cours
+    </span>
+</div>
 @stop
 
 @section('content')
 
-{{-- Filters --}}
-<div class="card mb-3">
-    <div class="card-header bg-light">
-        <h3 class="card-title"><i class="fas fa-filter"></i> Filtres</h3>
+{{-- Stats rapides --}}
+@php
+    $alerte = 0; $ok = 0;
+    foreach($documents as $doc) {
+        $ls = $doc->movements->where('action_type','Sortie')->sort(fn($a,$b) => $b->date_action <=> $a->date_action)->first();
+        $dl = $ls?->deadline ? \Carbon\Carbon::parse($ls->deadline) : null;
+        if ($dl && now()->diffInHours($dl, false) <= 8 && now()->diffInHours($dl, false) >= 0) {
+            $alerte++;
+        } else { $ok++; }
+    }
+@endphp
+
+<div class="row row-deck mb-4">
+    <div class="col-sm-4">
+        <div class="card shadow-sm border-0" style="border-left: 4px solid #d63939 !important;">
+            <div class="card-body d-flex align-items-center gap-3">
+                <span class="avatar rounded-3 bg-danger-lt" style="width:48px;height:48px;">
+                    <i class="ti ti-flame text-danger" style="font-size:1.4rem;"></i>
+                </span>
+                <div>
+                    <div class="text-muted small fw-bold text-uppercase" style="font-size:.7rem;letter-spacing:.5px;">Alerte Rouge (≤8h)</div>
+                    <div class="h2 fw-bold mb-0 text-danger">{{ $alerte }}</div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="card-body">
+    <div class="col-sm-4">
+        <div class="card shadow-sm border-0" style="border-left: 4px solid #f59f00 !important;">
+            <div class="card-body d-flex align-items-center gap-3">
+                <span class="avatar rounded-3 bg-warning-lt" style="width:48px;height:48px;">
+                    <i class="ti ti-clock text-warning" style="font-size:1.4rem;"></i>
+                </span>
+                <div>
+                    <div class="text-muted small fw-bold text-uppercase" style="font-size:.7rem;letter-spacing:.5px;">Dans les délais</div>
+                    <div class="h2 fw-bold mb-0 text-warning">{{ $ok }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="card shadow-sm border-0" style="border-left: 4px solid #206bc4 !important;">
+            <div class="card-body d-flex align-items-center gap-3">
+                <span class="avatar rounded-3 bg-primary-lt" style="width:48px;height:48px;">
+                    <i class="ti ti-list text-primary" style="font-size:1.4rem;"></i>
+                </span>
+                <div>
+                    <div class="text-muted small fw-bold text-uppercase" style="font-size:.7rem;letter-spacing:.5px;">Total en cours</div>
+                    <div class="h2 fw-bold mb-0 text-primary">{{ $documents->total() }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Filtres --}}
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body py-3">
         <form method="GET" action="{{ route('documents.bac.temp-out') }}">
-            <div class="row">
-
-                {{-- Recherche par Nom --}}
-                <div class="col-md-3 mb-2">
-                    <label class="font-weight-bold small">Nom / Prénom</label>
-                    <div class="input-group input-group-sm">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text"><i class="fas fa-user"></i></span>
-                        </div>
-                        <input type="text" name="search" class="form-control"
-                               placeholder="Rechercher par nom..."
-                               value="{{ request('search') }}">
-                    </div>
+            <div class="row g-2 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-muted">Nom / Prénom</label>
+                    <input type="text" name="search" class="form-control" placeholder="Rechercher..." value="{{ request('search') }}">
                 </div>
-
-                {{-- Recherche par CIN / CEF --}}
-                <div class="col-md-3 mb-2">
-                    <label class="font-weight-bold small">CIN / CEF</label>
-                    <div class="input-group input-group-sm">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text"><i class="fas fa-id-card"></i></span>
-                        </div>
-                        <input type="text" name="cin" class="form-control"
-                               placeholder="Rechercher par CIN ou CEF..."
-                               value="{{ request('cin') }}">
-                    </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-muted">CIN / CEF</label>
+                    <input type="text" name="cin" class="form-control" placeholder="CIN ou CEF..." value="{{ request('cin') }}">
                 </div>
-
-                <div class="col-md-3">
-                    <label>Filière</label>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-muted">Filière</label>
                     <select name="filiere_id" class="form-control select2">
-                        <option value="">— Toutes les filières —</option>
+                        <option value="">— Toutes —</option>
                         @foreach($filieres as $f)
-                            <option value="{{ $f->id }}"
-                                {{ request('filiere_id') == $f->id ? 'selected' : '' }}>
-                                {{ $f->nom_filiere }}
-                            </option>
+                            <option value="{{ $f->id }}" {{ request('filiere_id') == $f->id ? 'selected' : '' }}>{{ $f->nom_filiere }}</option>
                         @endforeach
                     </select>
                 </div>
-
                 <div class="col-md-2">
-                    <label>Groupe</label>
+                    <label class="form-label small fw-bold text-muted">Groupe</label>
                     <select name="group" class="form-control">
                         <option value="">— Tous —</option>
                         @foreach($groups as $g)
-                            <option value="{{ $g }}"
-                                {{ request('group') == $g ? 'selected' : '' }}>
-                                {{ $g }}
-                            </option>
+                            <option value="{{ $g }}" {{ request('group') == $g ? 'selected' : '' }}>{{ $g }}</option>
                         @endforeach
                     </select>
                 </div>
-
                 <div class="col-md-2">
-                    <label>Année promotion</label>
+                    <label class="form-label small fw-bold text-muted">Année promo</label>
                     <select name="graduation_year" class="form-control">
                         <option value="">— Toutes —</option>
                         @foreach($years as $y)
-                            <option value="{{ $y }}"
-                                {{ request('graduation_year') == $y ? 'selected' : '' }}>
-                                {{ $y }}
-                            </option>
+                            <option value="{{ $y }}" {{ request('graduation_year') == $y ? 'selected' : '' }}>{{ $y }}</option>
                         @endforeach
                     </select>
                 </div>
-
-                <div class="col-md-2">
-                    <label>Année d'étude</label>
-                    <select name="annee_etude" class="form-control">
-                        <option value="">— Toutes —</option>
-                        @foreach($annees_etude as $a)
-                            <option value="{{ $a }}"
-                                {{ request('annee_etude') == $a ? 'selected' : '' }}>
-                                {{ $a }}
-                            </option>
-                        @endforeach
-                    </select>
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-fill"><i class="ti ti-search"></i> Filtrer</button>
+                    <a href="{{ route('documents.bac.temp-out') }}" class="btn btn-outline-secondary" title="Reset"><i class="ti ti-x"></i></a>
                 </div>
-
-                <div class="col-md-2 d-flex align-items-end mt-2" style="gap:6px">
-                    <button type="submit" class="btn btn-primary btn-sm flex-fill">
-                        <i class="fas fa-filter"></i> Filtrer
-                    </button>
-                    <a href="{{ route('documents.bac.temp-out') }}" class="btn btn-secondary btn-sm">
-                        <i class="fas fa-times"></i>
-                    </a>
-                </div>
-
             </div>
         </form>
     </div>
 </div>
 
-{{-- Stats rapides --}}
-@php
-    $alerte = 0;
-    $ok     = 0;
-    foreach($documents as $doc) {
-        $ls = $doc->movements->where('action_type','Sortie')->sortByDesc('date_action')->first();
-        $dl = $ls?->deadline ? \Carbon\Carbon::parse($ls->deadline) : null;
-        if ($dl && now()->diffInHours($dl, false) <= 8 && now()->diffInHours($dl, false) >= 0) {
-            $alerte++;
-        } else {
-            $ok++;
-        }
-    }
-@endphp
-
-<div class="row mb-3">
-    <div class="col-md-4">
-        <div class="small-box bg-danger">
-            <div class="inner">
-                <h3>{{ $alerte }}</h3>
-                <p>Alerte Rouge (40h-48h)</p>
-            </div>
-            <div class="icon"><i class="fas fa-fire"></i></div>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="small-box bg-warning">
-            <div class="inner">
-                <h3>{{ $ok }}</h3>
-                <p>Dans les délais</p>
-            </div>
-            <div class="icon"><i class="fas fa-clock"></i></div>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="small-box bg-info">
-            <div class="inner">
-                <h3>{{ $documents->total() }}</h3>
-                <p>Total en cours</p>
-            </div>
-            <div class="icon"><i class="fas fa-list"></i></div>
-        </div>
-    </div>
-</div>
-
 {{-- Table --}}
-<div class="card">
-    <div class="card-body table-responsive">
-        <table id="tempout-table" class="table table-bordered table-hover">
-            <thead class="bg-warning">
-                <tr>
-                    <th>#</th>
-                    <th>Stagiaire</th>
-                    <th>CIN</th>
-                    <th>Téléphone</th>
-                    <th>Filière</th>
-                    <th>Groupe</th>
-                    <th>Date retrait</th>
-                    <th>Deadline (48h)</th>
-                    <th>Statut / Retard</th>
-                    <th>Signature</th>
-                    <th>Actions</th>
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+        <table class="table table-vcenter table-hover mb-0">
+            <thead>
+                <tr style="border-bottom: 2px solid var(--tblr-border-color);">
+                    <th class="text-muted fw-bold text-uppercase" style="font-size:.7rem;width:40px;">#</th>
+                    <th class="text-muted fw-bold text-uppercase" style="font-size:.7rem;">Stagiaire</th>
+                    <th class="text-muted fw-bold text-uppercase" style="font-size:.7rem;">CIN</th>
+                    <th class="text-muted fw-bold text-uppercase" style="font-size:.7rem;">Téléphone</th>
+                    <th class="text-muted fw-bold text-uppercase" style="font-size:.7rem;">Filière / Gr.</th>
+                    <th class="text-muted fw-bold text-uppercase" style="font-size:.7rem;">Date retrait</th>
+                    <th class="text-muted fw-bold text-uppercase" style="font-size:.7rem;">Deadline 48h</th>
+                    <th class="text-muted fw-bold text-uppercase" style="font-size:.7rem;">Temps restant</th>
+                    <th class="text-muted fw-bold text-uppercase" style="font-size:.7rem;">Scan / Signature</th>
+                    <th class="text-muted fw-bold text-uppercase text-end" style="font-size:.7rem;">Actions</th>
                 </tr>
             </thead>
-
             <tbody>
                 @forelse($documents as $doc)
                 @php
                     $lastSortie = $doc->movements
                         ->where('action_type', 'Sortie')
-                        ->sortByDesc('date_action')
+                        ->sort(fn($a,$b) => $b->date_action <=> $a->date_action)
                         ->first();
-                    $deadline   = $lastSortie?->deadline
-                        ? \Carbon\Carbon::parse($lastSortie->deadline)
-                        : null;
-                    
+                    $deadline  = $lastSortie?->deadline ? \Carbon\Carbon::parse($lastSortie->deadline) : null;
                     $hoursLeft = $deadline ? now()->diffInHours($deadline, false) : null;
                     $isAlerte  = $hoursLeft !== null && $hoursLeft <= 8 && $hoursLeft >= 0;
+                    $isExpired = $hoursLeft !== null && $hoursLeft < 0;
                 @endphp
-                <tr class="{{ $isAlerte ? 'table-danger' : '' }}">
-                    <td>{{ $loop->iteration }}</td>
+                <tr style="{{ $isAlerte ? 'background:rgba(214,57,57,.06);' : ($isExpired ? 'background:rgba(214,57,57,.04);' : '') }}">
+                    <td class="text-muted" style="font-size:.8rem;">{{ $loop->iteration }}</td>
 
                     <td>
-                        <a href="{{ route('trainees.show', $doc->trainee) }}">
-                            {{ $doc->trainee->last_name }} {{ $doc->trainee->first_name }}
+                        <a href="{{ route('trainees.show', $doc->trainee) }}" class="fw-bold text-body text-decoration-none" style="font-size:.875rem;">
+                            {{ strtoupper($doc->trainee->last_name) }} {{ ucfirst(strtolower($doc->trainee->first_name)) }}
                         </a>
                     </td>
 
-                    <td>{{ $doc->trainee->cin }}</td>
+                    <td class="font-monospace text-muted" style="font-size:.825rem;">{{ $doc->trainee->cin }}</td>
 
-                    <td>
+                    <td style="font-size:.825rem;">
                         @if($doc->trainee->phone)
-                            <a href="tel:{{ $doc->trainee->phone }}">
-                                {{ $doc->trainee->phone }}
-                            </a>
-                        @else
-                            <span class="text-muted">—</span>
-                        @endif
+                            <a href="tel:{{ $doc->trainee->phone }}" class="text-body">{{ $doc->trainee->phone }}</a>
+                        @else <span class="text-muted">—</span> @endif
                     </td>
 
-                    <td>{{ $doc->trainee->filiere->nom_filiere }}</td>
-                    <td>{{ $doc->trainee->group }}</td>
-
-                    <td>
-                        {{ $lastSortie
-                            ? \Carbon\Carbon::parse($lastSortie->date_action)->format('d/m/Y H:i')
-                            : '—' }}
+                    <td style="font-size:.825rem;">
+                        <div class="text-body">{{ $doc->trainee->filiere->nom_filiere }}</div>
+                        <span class="badge bg-blue-lt text-blue fw-bold">{{ $doc->trainee->group }}</span>
                     </td>
 
-                    <td>
+                    <td class="text-muted" style="font-size:.825rem;">
+                        {{ $lastSortie ? \Carbon\Carbon::parse($lastSortie->date_action)->format('d/m/Y H:i') : '—' }}
+                    </td>
+
+                    <td class="text-muted" style="font-size:.825rem;">
                         {{ $deadline ? $deadline->format('d/m/Y H:i') : '—' }}
                     </td>
 
                     <td>
                         @if($isAlerte)
-                            <span class="badge bg-danger">
-                                <i class="fas fa-exclamation-triangle"></i> Alerte: {{ $hoursLeft }}h restantes
+                            <span class="badge bg-danger fw-bold">
+                                <i class="ti ti-alert-triangle me-1"></i>{{ round($hoursLeft) }}h restantes
+                            </span>
+                        @elseif($isExpired)
+                            <span class="badge bg-danger-lt text-danger fw-bold">
+                                <i class="ti ti-clock-x me-1"></i>Expiré
+                            </span>
+                        @elseif($hoursLeft !== null && $hoursLeft <= 24)
+                            <span class="badge bg-warning-lt text-warning fw-bold">
+                                <i class="ti ti-clock me-1"></i>{{ round($hoursLeft) }}h restantes
                             </span>
                         @elseif($hoursLeft !== null)
-                            @if($hoursLeft <= 24)
-                                <span class="badge bg-warning">
-                                    {{ $hoursLeft }}h restantes
-                                </span>
-
-                            @else
-                                <span class="badge bg-success">
-                                    {{ $hoursLeft }}h restantes
-                                </span>
-                            @endif
-
+                            <span class="badge bg-success-lt text-success fw-bold">
+                                <i class="ti ti-circle-check me-1"></i>{{ round($hoursLeft) }}h restantes
+                            </span>
                         @else
-                            <span class="badge bg-secondary">—</span>
+                            <span class="text-muted">—</span>
                         @endif
                     </td>
 
-                    {{-- ✅ COLONNE SIGNATURE / SCANNER --}}
                     <td class="text-center">
                         <button type="button"
-                                class="btn btn-warning btn-sm btn-scan-temp"
+                                class="btn btn-sm btn-outline-warning btn-scan-temp"
                                 data-cin="{{ $doc->trainee->cin }}"
                                 data-id="{{ $doc->id }}"
                                 title="Scanner CIN / QR Code">
-                            <i class="fas fa-qrcode"></i> Scanner
+                            <i class="ti ti-qrcode me-1"></i> Scanner
                         </button>
                         <div id="scan-result-{{ $doc->id }}" class="mt-1" style="display:none">
                             <span class="badge scan-badge-{{ $doc->id }} bg-success">
-                                <i class="fas fa-check-circle"></i>
+                                <i class="ti ti-check"></i>
                                 <span class="scan-text-{{ $doc->id }}"></span>
                             </span>
                         </div>
                     </td>
 
-                    <td>
-                        <a href="{{ route('documents.show', $doc) }}"
-                           class="btn btn-sm btn-info">
-                            <i class="fas fa-eye"></i>
-                        </a>
-
-                        <form action="{{ route('documents.retour', $doc) }}"
-                              method="POST" style="display:inline">
-                            @csrf
-                            <button type="submit"
-                                    class="btn btn-sm btn-success"
-                                    onclick="return confirm('Confirmer le retour du Bac?')">
-                                <i class="fas fa-undo"></i> Retour
-                            </button>
-                        </form>
+                    <td class="text-end">
+                        <div class="d-flex justify-content-end gap-1">
+                            <a href="{{ route('documents.show', $doc) }}" class="btn btn-sm btn-outline-primary btn-icon" title="Voir">
+                                <i class="ti ti-eye"></i>
+                            </a>
+                            <form action="{{ route('documents.retour', $doc) }}" method="POST" style="display:inline">
+                                @csrf
+                                <button type="submit" class="btn btn-sm btn-outline-success" onclick="return confirm('Confirmer le retour du Bac?')" title="Retour en stock">
+                                    <i class="ti ti-arrow-back-up me-1"></i>Retour
+                                </button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
-
                 @empty
                 <tr>
-                    <td colspan="11" class="text-center py-4 text-success">
-                        <strong>Aucun retrait temporaire en cours</strong>
+                    <td colspan="10" class="text-center py-5">
+                        <div class="empty">
+                            <div class="empty-icon text-success"><i class="ti ti-circle-check" style="font-size:3rem;"></i></div>
+                            <p class="empty-title mt-3 fw-bold">Aucun retrait temporaire en cours</p>
+                            <p class="empty-subtitle text-muted">Tous les Bacs sont en stock ou ont été remis.</p>
+                        </div>
                     </td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
-
-        {{ $documents->links() }}
+        </div>
+        @if($documents->hasPages())
+        <div class="card-footer border-0 d-flex justify-content-end">{{ $documents->links() }}</div>
+        @endif
     </div>
 </div>
 

@@ -14,12 +14,12 @@ class DocumentReadyNotification extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $docRequest;
+    public \App\Models\DocumentRequest $docRequest;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($docRequest)
+    public function __construct(\App\Models\DocumentRequest $docRequest)
     {
         $this->docRequest = $docRequest;
     }

@@ -339,6 +339,10 @@
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         
+        const isDarkMode = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+        const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : '#e6e8eb';
+        const textColor = isDarkMode ? '#b4b7bd' : '#6c7a91';
+        
         // ---- CHART 1 : Activity Line Chart ----
         const ctxActivity = document.getElementById('activityChart').getContext('2d');
         let gradientStroke = ctxActivity.createLinearGradient(0, 0, 0, 300);
@@ -355,7 +359,7 @@
                     borderColor: '#206bc4',
                     backgroundColor: gradientStroke,
                     borderWidth: 3,
-                    pointBackgroundColor: '#ffffff',
+                    pointBackgroundColor: isDarkMode ? '#182433' : '#ffffff',
                     pointBorderColor: '#206bc4',
                     pointBorderWidth: 2,
                     pointRadius: 4,
@@ -369,8 +373,8 @@
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 11 } } },
-                    y: { grid: { borderDash: [4, 4], color: '#e6e8eb' }, ticks: { font: { family: 'Inter', size: 11 } }, beginAtZero: true }
+                    x: { grid: { display: false }, ticks: { color: textColor, font: { family: 'Inter', size: 11 } } },
+                    y: { grid: { borderDash: [4, 4], color: gridColor }, ticks: { color: textColor, font: { family: 'Inter', size: 11 } }, beginAtZero: true }
                 }
             }
         });
@@ -384,7 +388,8 @@
                 datasets: [{
                     data: [120, {{ $stats['bac_temp_out'] }}, {{ $stats['bac_expired'] }}],
                     backgroundColor: ['#206bc4', '#f59f00', '#d63939'],
-                    borderWidth: 0,
+                    borderWidth: 2,
+                    borderColor: isDarkMode ? '#182433' : '#ffffff',
                     cutout: '80%'
                 }]
             },

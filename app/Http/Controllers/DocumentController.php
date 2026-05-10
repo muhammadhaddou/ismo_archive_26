@@ -12,9 +12,83 @@ use Illuminate\Support\Facades\Storage;
 
 class DocumentController extends Controller
 {
+    // ═══════════════════════════════════════════════════
+    //  MACHINE D'ÉTAT — transitions autorisées
+    //  Stock    → Temp_Out | Final_Out
+    //  Temp_Out → Stock (retour) | Final_Out (définitif)
+    //  Final_Out / Remis → rien (terminal)
+    // ═══════════════════════════════════════════════════
+    private const TERMINAL_STATUSES = ['Final_Out', 'Remis'];
+
+    /**
+     * Crée le mouvement associé à un document et retourne le message flash.
+     * Centralise la logique de Movement::create() pour éviter la duplication.
+     */
+    private function recordMovement(Document $document, string $actionType, array $extras = []): void
+    {
+        $deadline = ($actionType === 'Sortie' && ($extras['doc_status'] ?? '') === 'Temp_Out')
+            ? now()->addHours(48)
+            : null;
+
+        Movement::create(array_merge([
+            'document_id' => $document->id,
+            'user_id'     => Auth::id(),
+            'action_type' => $actionType,
+            'date_action' => now(),
+            'deadline'    => $deadline,
+        ], $extras['movement'] ?? []));
+    }
+
+    /**
+     * Applique les effets secondaires sur le stagiaire selon le statut du document.
+     *
+     * Règles métier :
+     * - Diplome Final_Out → trainee.statut = 'diplome'
+     *                     → Bac du même stagiaire passe aussi en Final_Out (automatique)
+     * - Diplome revient en Stock → annule statut diplome
+     *                            → Bac revient en Stock si il était Final_Out suite au diplôme
+     *
+     * Bac Final_Out seul (sans Diplome) = retrait pur (abandon, etc.) — géré séparément.
+     */
+    private function syncTraineeStatut(Document $document): void
+    {
+        if ($document->type !== 'Diplome') return;
+
+        $trainee = $document->trainee;
+
+        if (in_array($document->status, self::TERMINAL_STATUSES)) {
+            // 1. Marquer le stagiaire comme diplômé
+            if ($trainee->statut !== 'diplome') {
+                $trainee->update(['statut' => 'diplome']);
+            }
+
+            // 2. Fermer le Bac automatiquement s'il existe et n'est pas déjà Final_Out
+            $bac = $trainee->documents()->where('type', 'Bac')->first();
+            if ($bac && !in_array($bac->status, self::TERMINAL_STATUSES)) {
+                $bac->update(['status' => 'Final_Out']);
+                // Enregistrer le mouvement automatique
+                Movement::create([
+                    'document_id' => $bac->id,
+                    'user_id'     => Auth::id(),
+                    'action_type' => 'Sortie',
+                    'date_action' => now(),
+                    'observations'=> 'Retrait définitif automatique — diplôme remis au stagiaire',
+                ]);
+            }
+
+        } else {
+            // Diplôme revenu en stock → annule statut diplômé
+            if ($trainee->statut === 'diplome') {
+                $trainee->update(['statut' => null]);
+            }
+        }
+    }
+
+    // ────────────────────────────────────────────────────
+    //  INDEX
+    // ────────────────────────────────────────────────────
     public function index(Request $request)
     {
-        // Read type from query string OR from route defaults (e.g. ->defaults('type', 'Bac'))
         $type = $request->input('type') ?? $request->route('type');
 
         $documents = Document::with('trainee.filiere')
@@ -44,6 +118,9 @@ class DocumentController extends Controller
         return view('documents.index', compact('documents', 'type', 'filieres'));
     }
 
+    // ────────────────────────────────────────────────────
+    //  CREATE / STORE
+    // ────────────────────────────────────────────────────
     public function create()
     {
         $trainees = Trainee::with('filiere')->orderBy('last_name')->get();
@@ -60,6 +137,17 @@ class DocumentController extends Controller
             'scan_file'        => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);
 
+        $trainee = Trainee::findOrFail($request->trainee_id);
+
+        // 🚫 Un document de ce type existe déjà pour ce stagiaire
+        $exists = $trainee->documents()->where('type', $request->type)->exists();
+        if ($exists) {
+            return redirect()->back()->with('error',
+                "❌ Ce stagiaire possède déjà un document de type « {$request->type} » dans le système."
+            );
+        }
+
+        // Statut initial : Bac peut être saisi directement en Temp_Out/Final_Out
         $status = $request->type === 'Bac'
             ? ($request->bac_status ?? 'Temp_Out')
             : 'Stock';
@@ -78,107 +166,143 @@ class DocumentController extends Controller
             'scan_file'        => $scanPath,
         ]);
 
-        $actionType = ($request->type === 'Bac' && $status !== 'Stock')
-            ? 'Sortie'
-            : 'Saisie';
+        $actionType = ($request->type === 'Bac' && $status !== 'Stock') ? 'Sortie' : 'Saisie';
 
-        $deadline = ($status === 'Temp_Out') ? now()->addHours(48) : null;
-
-        Movement::create([
-            'document_id'  => $document->id,
-            'user_id'      => Auth::id(),
-            'action_type'  => $actionType,
-            'date_action'  => now(),
-            'deadline'     => $deadline,
-            'observations' => match ($status) {
-                'Temp_Out'  => 'Retrait temporaire (48h)',
-                'Final_Out' => 'Retrait définitif',
-                default     => 'Document enregistré',
-            },
+        $this->recordMovement($document, $actionType, [
+            'doc_status' => $status,
+            'movement'   => [
+                'observations' => match ($status) {
+                    'Temp_Out'  => 'Retrait temporaire (48h)',
+                    'Final_Out' => 'Retrait définitif',
+                    default     => 'Document enregistré en stock',
+                },
+            ],
         ]);
 
+        // Sync statut stagiaire si nécessaire
+        $this->syncTraineeStatut($document);
+
         return match ($status) {
-            'Temp_Out'  => redirect()->route('documents.bac.temp-out')
-                ->with('success', 'Bac en retrait temporaire ✅'),
-
-            'Final_Out' => redirect()->route('documents.bac.final-out')
-                ->with('success', 'Bac en retrait définitif ✅'),
-
-            default => redirect()->route('trainees.show', $request->trainee_id)
-                ->with('success', 'Document ajouté ✅'),
+            'Temp_Out'  => redirect()->route('documents.bac.temp-out')->with('success', 'Bac en retrait temporaire ✅'),
+            'Final_Out' => redirect()->route('documents.bac.final-out')->with('success', 'Bac en retrait définitif ✅'),
+            default     => redirect()->route('trainees.show', $request->trainee_id)->with('success', 'Document ajouté en stock ✅'),
         };
     }
 
+    // ────────────────────────────────────────────────────
+    //  SHOW
+    // ────────────────────────────────────────────────────
     public function show(Document $document)
     {
         $document->load('trainee.filiere', 'movements.user');
         return view('documents.show', compact('document'));
     }
 
+    // ────────────────────────────────────────────────────
+    //  SORTIE (Temp_Out ou Final_Out)
+    // ────────────────────────────────────────────────────
     public function sortie(Request $request, Document $document)
     {
         $request->validate([
-            'action_type'  => 'required|in:Temp_Out,Final_Out',
-            'observations' => 'nullable|string',
-            'is_proxy'     => 'nullable|boolean',
-            'proxy_name'   => 'nullable|string|required_if:is_proxy,1',
-            'proxy_cin'    => 'nullable|string|required_if:is_proxy,1',
+            'action_type'    => 'required|in:Temp_Out,Final_Out',
+            'observations'   => 'nullable|string',
+            'is_proxy'       => 'nullable|boolean',
+            'proxy_name'     => 'nullable|string|required_if:is_proxy,1',
+            'proxy_cin'      => 'nullable|string|required_if:is_proxy,1',
             'proxy_document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120|required_if:is_proxy,1',
         ]);
 
-        $document->update([
-            'status' => $request->action_type
-        ]);
+        // 🚫 Document déjà en état terminal → impossible de sortir à nouveau
+        if (in_array($document->status, self::TERMINAL_STATUSES)) {
+            return redirect()->back()->with('error',
+                '❌ Ce document a déjà été remis définitivement. Aucune nouvelle action possible.'
+            );
+        }
 
-        $deadline = $request->action_type === 'Temp_Out'
-            ? now()->addHours(48)
-            : null;
+        // 🚫 Déjà en Temp_Out et on essaie de refaire Temp_Out
+        if ($document->status === 'Temp_Out' && $request->action_type === 'Temp_Out') {
+            return redirect()->back()->with('error',
+                '⚠️ Ce document est déjà en retrait temporaire. Enregistrez son retour en stock avant une nouvelle sortie.'
+            );
+        }
+
+        // 🚫 Pour un Diplôme : uniquement retrait définitif (pas temporaire)
+        if ($document->type === 'Diplome' && $request->action_type === 'Temp_Out') {
+            return redirect()->back()->with('error',
+                '❌ Un diplôme ne peut pas être en retrait temporaire. Choisissez "Retrait définitif".'
+            );
+        }
 
         $proxyPath = null;
         if ($request->hasFile('proxy_document')) {
             $proxyPath = $request->file('proxy_document')->store('procurations', 'local');
         }
 
-        Movement::create([
-            'document_id'         => $document->id,
-            'user_id'             => Auth::id(),
-            'action_type'         => 'Sortie',
-            'date_action'         => now(),
-            'deadline'            => $deadline,
-            'observations'        => $request->observations,
-            'is_proxy'            => $request->boolean('is_proxy'),
-            'proxy_name'          => $request->proxy_name,
-            'proxy_cin'           => $request->proxy_cin,
-            'proxy_document_path' => $proxyPath,
+        $document->update(['status' => $request->action_type]);
+
+        $this->recordMovement($document, 'Sortie', [
+            'doc_status' => $request->action_type,
+            'movement'   => [
+                'observations'        => $request->observations,
+                'is_proxy'            => $request->boolean('is_proxy'),
+                'proxy_name'          => $request->proxy_name,
+                'proxy_cin'           => $request->proxy_cin,
+                'proxy_document_path' => $proxyPath,
+            ],
         ]);
 
-        return redirect()->route('documents.show', $document)
-            ->with('success', 'Sortie enregistrée ✅');
+        // Sync statut stagiaire
+        $this->syncTraineeStatut($document);
+
+        $msg = ($document->type === 'Diplome' && $request->action_type === 'Final_Out')
+            ? '🎓 Diplôme remis ! Le stagiaire passe dans la liste des diplômés.'
+            : 'Sortie enregistrée ✅';
+
+        return redirect()->route('documents.show', $document)->with('success', $msg);
     }
 
+    // ────────────────────────────────────────────────────
+    //  RETOUR (revient en Stock — uniquement depuis Temp_Out)
+    // ────────────────────────────────────────────────────
     public function retour(Request $request, Document $document)
     {
+        // 🚫 Impossible de faire un retour si le document est en état terminal
+        if (in_array($document->status, self::TERMINAL_STATUSES)) {
+            return redirect()->back()->with('error',
+                '❌ Ce document a été remis définitivement. Il ne peut pas revenir en stock.'
+            );
+        }
+
+        // 🚫 Déjà en stock
+        if ($document->status === 'Stock') {
+            return redirect()->back()->with('error',
+                '⚠️ Ce document est déjà en stock.'
+            );
+        }
+
         $document->update(['status' => 'Stock']);
 
-        Movement::create([
-            'document_id'  => $document->id,
-            'user_id'      => Auth::id(),
-            'action_type'  => 'Retour',
-            'date_action'  => now(),
-            'observations' => $request->observations ?? 'Retour du document',
+        $this->recordMovement($document, 'Retour', [
+            'movement' => [
+                'observations' => $request->observations ?? 'Retour du document en stock',
+            ],
         ]);
 
-        return redirect()->route('documents.show', $document)
-            ->with('success', 'Retour effectué ✅');
+        // Annule le statut diplômé si c'était un diplôme (normalement impossible ici, mais par sécurité)
+        $this->syncTraineeStatut($document);
+
+        return redirect()->route('documents.show', $document)->with('success', 'Retour en stock enregistré ✅');
     }
 
+    // ────────────────────────────────────────────────────
+    //  UPLOAD SCAN
+    // ────────────────────────────────────────────────────
     public function uploadScan(Request $request, Document $document)
     {
         $request->validate([
             'scan_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);
 
-        // Delete old scan if exists
         if ($document->scan_file) {
             Storage::disk('local')->delete($document->scan_file);
         }
@@ -190,73 +314,41 @@ class DocumentController extends Controller
             ->with('success', 'Scan uploadé avec succès ✅');
     }
 
-    // 🟡 Retraits temporaires (UPDATED)
+    // ────────────────────────────────────────────────────
+    //  LISTES SPÉCIALISÉES
+    // ────────────────────────────────────────────────────
     public function tempOut(Request $request)
     {
-        $filieres = Filiere::all();
-
-        $groups = Trainee::select('group')
-            ->distinct()
-            ->orderBy('group')
-            ->pluck('group');
-
-        $years = Trainee::select('graduation_year')
-            ->distinct()
-            ->orderByDesc('graduation_year')
-            ->pluck('graduation_year');
-
-        $annees_etude = Trainee::select('annee_etude')
-            ->whereNotNull('annee_etude')
-            ->distinct()
-            ->orderBy('annee_etude')
-            ->pluck('annee_etude');
+        $filieres     = Filiere::all();
+        $groups       = Trainee::select('group')->distinct()->orderBy('group')->pluck('group');
+        $years        = Trainee::select('graduation_year')->distinct()->orderByDesc('graduation_year')->pluck('graduation_year');
+        $annees_etude = Trainee::select('annee_etude')->whereNotNull('annee_etude')->distinct()->orderBy('annee_etude')->pluck('annee_etude');
 
         $documents = Document::with(['trainee.filiere', 'movements'])
             ->where('type', 'Bac')
             ->where('status', 'Temp_Out')
-            ->whereHas('latestSortie', function($q) {
-                $q->where('deadline', '>=', now());
-            })
-            ->when($request->search, fn($q) =>
-                $q->whereHas('trainee', fn($q) =>
-                    $q->where('last_name',  'like', '%'.$request->search.'%')
-                      ->orWhere('first_name','like', '%'.$request->search.'%')
-                ))
-            ->when($request->cin, fn($q) =>
-                $q->whereHas('trainee', fn($q) =>
-                    $q->where('cin', 'like', '%'.$request->cin.'%')
-                      ->orWhere('cef', 'like', '%'.$request->cin.'%')
-                ))
-            ->when($request->filiere_id, fn($q) =>
-                $q->whereHas('trainee', fn($q) =>
-                    $q->where('filiere_id', $request->filiere_id)))
-
-            ->when($request->group, fn($q) =>
-                $q->whereHas('trainee', fn($q) =>
-                    $q->where('group', $request->group)))
-
-            ->when($request->graduation_year, fn($q) =>
-                $q->whereHas('trainee', fn($q) =>
-                    $q->where('graduation_year', $request->graduation_year)))
-
-            ->when($request->annee_etude, fn($q) =>
-                $q->whereHas('trainee', fn($q) =>
-                    $q->where('annee_etude', $request->annee_etude)))
-
+            ->whereHas('latestSortie', fn($q) => $q->where('deadline', '>=', now()))
+            ->when($request->search, fn($q) => $q->whereHas('trainee', fn($q) =>
+                $q->where('last_name',  'like', '%'.$request->search.'%')
+                  ->orWhere('first_name','like', '%'.$request->search.'%')))
+            ->when($request->cin, fn($q) => $q->whereHas('trainee', fn($q) =>
+                $q->where('cin', 'like', '%'.$request->cin.'%')
+                  ->orWhere('cef', 'like', '%'.$request->cin.'%')))
+            ->when($request->filiere_id, fn($q) => $q->whereHas('trainee', fn($q) =>
+                $q->where('filiere_id', $request->filiere_id)))
+            ->when($request->group, fn($q) => $q->whereHas('trainee', fn($q) =>
+                $q->where('group', $request->group)))
+            ->when($request->graduation_year, fn($q) => $q->whereHas('trainee', fn($q) =>
+                $q->where('graduation_year', $request->graduation_year)))
+            ->when($request->annee_etude, fn($q) => $q->whereHas('trainee', fn($q) =>
+                $q->where('annee_etude', $request->annee_etude)))
             ->latest()
             ->paginate(15)
             ->withQueryString();
 
-        return view('documents.temp-out', compact(
-            'documents',
-            'filieres',
-            'groups',
-            'years',
-            'annees_etude'
-        ));
+        return view('documents.temp-out', compact('documents', 'filieres', 'groups', 'years', 'annees_etude'));
     }
 
-    // 🔴 Retraits écoulés (NEW)
     public function ecoule(Request $request)
     {
         $filieres = Filiere::all();
@@ -265,15 +357,11 @@ class DocumentController extends Controller
         $documents = Document::with('trainee.filiere', 'movements')
             ->where('type', 'Bac')
             ->where('status', 'Temp_Out')
-            ->whereHas('latestSortie', function($q) {
-                $q->where('deadline', '<', now());
-            })
-            ->when($request->filiere_id, fn($q) =>
-                $q->whereHas('trainee', fn($q) =>
-                    $q->where('filiere_id', $request->filiere_id)))
-            ->when($request->group, fn($q) =>
-                $q->whereHas('trainee', fn($q) =>
-                    $q->where('group', $request->group)))
+            ->whereHas('latestSortie', fn($q) => $q->where('deadline', '<', now()))
+            ->when($request->filiere_id, fn($q) => $q->whereHas('trainee', fn($q) =>
+                $q->where('filiere_id', $request->filiere_id)))
+            ->when($request->group, fn($q) => $q->whereHas('trainee', fn($q) =>
+                $q->where('group', $request->group)))
             ->latest()
             ->paginate(15)
             ->withQueryString();
@@ -281,7 +369,6 @@ class DocumentController extends Controller
         return view('documents.ecoule', compact('documents', 'filieres', 'groups'));
     }
 
-    // 🔴 Retraits définitifs (NEW)
     public function finalOut(Request $request)
     {
         $filieres = Filiere::all();
@@ -290,12 +377,10 @@ class DocumentController extends Controller
         $documents = Document::with('trainee.filiere')
             ->where('type', 'Bac')
             ->where('status', 'Final_Out')
-            ->when($request->filiere_id, fn($q) =>
-                $q->whereHas('trainee', fn($q) =>
-                    $q->where('filiere_id', $request->filiere_id)))
-            ->when($request->group, fn($q) =>
-                $q->whereHas('trainee', fn($q) =>
-                    $q->where('group', $request->group)))
+            ->when($request->filiere_id, fn($q) => $q->whereHas('trainee', fn($q) =>
+                $q->where('filiere_id', $request->filiere_id)))
+            ->when($request->group, fn($q) => $q->whereHas('trainee', fn($q) =>
+                $q->where('group', $request->group)))
             ->latest()
             ->paginate(15)
             ->withQueryString();
@@ -303,7 +388,6 @@ class DocumentController extends Controller
         return view('documents.final-out', compact('documents', 'filieres', 'groups'));
     }
 
-    // 🎓 Diplômes en stock
     public function prets()
     {
         $documents = Document::with('trainee.filiere')

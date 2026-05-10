@@ -24,7 +24,11 @@
                 <li><code>DateNaissance</code>, <code>Site</code>, <code>Regimeinscription</code>, <code>DateInscription</code>, <code>DateDossierComplet</code>, <code>LieuNaissance</code>, <code>MotifAdmission</code></li>
                 <li><code>CIN</code>, <code>NTelelephone</code>, <code>NTel_du_Tuteur</code>, <code>Adresse</code>, <code>Nationalite</code>, <code>anneeEtude</code></li>
                 <li><code>Nom_Arabe</code>, <code>Prenom_arabe</code>, <code>NiveauScolaire</code></li>
-                <li class="mt-1">Optionnel : <code>filiere</code> / <code>CodeDiplome</code> = code filière (table <code>filieres.code_filiere</code>), <code>groupe</code>, <code>cef</code>, <code>annee</code> (promotion)</li>
+                <li class="mt-1">
+                    <span class="badge bg-primary-lt">Nouveaux champs supportés :</span><br>
+                    <code>cin_pere</code>, <code>cin_mere</code>, <code>image_profile</code> (nom du fichier/URL), <code>statut</code> (en_formation, diplome, abandon, redoublant), <code>password</code>, <code>cin_scan</code>, <code>cin_pere_scan</code>, <code>cin_mere_scan</code>
+                </li>
+                <li class="mt-2 text-muted">Optionnel : <code>filiere</code> / <code>CodeDiplome</code> = code filière (table <code>filieres.code_filiere</code>), <code>groupe</code>, <code>cef</code>, <code>annee</code> (promotion)</li>
             </ul>
         </div>
 

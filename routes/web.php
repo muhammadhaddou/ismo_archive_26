@@ -32,14 +32,13 @@ Route::middleware(['auth'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Import Excel
-    Route::get('trainees/import',  [ImportController::class, 'index'])->name('trainees.import');
-    Route::post('trainees/import', [ImportController::class, 'store'])->name('trainees.import.store');
+    // Trainees — routes spécifiques AVANT resource (évite conflit {trainee} wildcard)
+    Route::get('trainees/import',              [ImportController::class, 'index'])->name('trainees.import');
+    Route::post('trainees/import',             [ImportController::class, 'store'])->name('trainees.import.store');
+    Route::get('trainees/bac/retraits-definitifs', [TraineeController::class, 'bacFinalOut'])->name('trainees.bac.final-out');
 
-    // Trainees
     Route::resource('trainees', TraineeController::class);
     Route::post('trainees/{trainee}/promouvoir', [TraineeController::class, 'promouvoir'])->name('trainees.promouvoir');
-
 
     // Documents static routes — كلها قبل resource
     Route::get('documents/bac',              [DocumentController::class, 'index'])->name('documents.bac')->defaults('type', 'Bac');
@@ -86,7 +85,7 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/filiere/{filiere}/groups', function (\App\Models\Filiere $filiere) {
             return response()->json([
-                'groups' => \App\Models\Trainee::where('filiere_id', $filiere->id)
+                'groups' => \App\Models\Trainee::query()->where('filiere_id', '=', $filiere->id)
                     ->distinct()
                     ->pluck('group')
                     ->sort()
@@ -96,7 +95,7 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/filiere/{filiere}/years', function (\App\Models\Filiere $filiere) {
             return response()->json([
-                'years' => \App\Models\Trainee::where('filiere_id', $filiere->id)
+                'years' => \App\Models\Trainee::query()->where('filiere_id', '=', $filiere->id)
                     ->distinct()
                     ->pluck('graduation_year')
                     ->sortDesc()

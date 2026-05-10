@@ -71,12 +71,13 @@
                         </td>
                         <td>{{ $req->trainee->filiere->code_filiere ?? 'N/A' }}</td>
                         <td>
-                            @if($req->document_type == 'Configuration Mot de passe')
+                            @if(in_array($req->document_type, ['Configuration Mot de passe', 'Activation Compte']))
                                 <span class="badge bg-success text-uppercase">Nouveau MDP Configuré</span><br>
                                 <small class="font-weight-bold {{ $req->status == 'en_attente' ? 'text-danger' : 'text-muted' }}">Mot de passe : {{ $req->admin_message }}</small>
                                 @if($req->status != 'en_attente')
                                     <br><small class="text-muted"><i class="fas fa-check"></i> Lu</small>
                                 @endif
+                            @elseif($req->document_type == 'Activation Compte')
                             @else
                                 @if($req->status == 'en_attente')
                                     <span class="badge bg-warning text-uppercase">En attente (Oubli)</span>
@@ -90,7 +91,7 @@
                         </td>
                         <td>
                             <div class="btn-group">
-                                @if($req->document_type == 'Configuration Mot de passe' && $req->status == 'en_attente')
+                                @if(in_array($req->document_type, ['Configuration Mot de passe', 'Activation Compte']) && $req->status == 'en_attente')
                                     <form action="{{ route('admin.password_requests.approve', $req->id) }}" method="POST" class="d-inline">
                                         @csrf
                                         <button type="submit" class="btn btn-sm btn-info" title="Marquer comme lu">

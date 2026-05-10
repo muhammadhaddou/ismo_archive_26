@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Trainee;
 use App\Models\DocumentRequest;
+use Illuminate\Support\Facades\Hash;
 
 class TraineeAuthController extends Controller
 {
@@ -20,23 +21,33 @@ class TraineeAuthController extends Controller
             'cin' => 'required'
         ]);
 
-        $trainee = Trainee::where('cef', trim($request->cef))
-            ->first();
+        $trainee = Trainee::query()->where('cef', '=', trim($request->cef))->first();
 
-        if ($trainee) {
-            // S'il n'a pas encore de mot de passe, on utilise la CIN comme mot de passe provisoire
-            if (empty($trainee->password)) {
-                if (trim($request->cin) === $trainee->cin) {
-                    $request->session()->put('trainee_id', $trainee->id);
-                    return redirect()->route('trainee.dashboard');
-                }
-            } else {
-                // S'il a déjà un mot de passe configuré, on le vérifie
-                if (\Illuminate\Support\Facades\Hash::check($request->cin, $trainee->password)) {
-                    $request->session()->put('trainee_id', $trainee->id);
-                    return redirect()->route('trainee.dashboard');
-                }
+        if (!$trainee) {
+            return back()->with('error', 'Informations incorrectes. Veuillez vérifier vos accès.');
+        }
+
+        // Cas 1 : Aucun mot de passe → CIN comme accès provisoire (première connexion)
+        if (empty($trainee->password)) {
+            if (trim($request->cin) === $trainee->cin) {
+                $request->session()->put('trainee_id', $trainee->id);
+                $request->session()->put('first_login', true);
+                return redirect()->route('trainee.password.setup');
             }
+            return back()->with('error', 'Informations incorrectes. Veuillez vérifier vos accès.');
+        }
+
+        // Cas 2 : Mot de passe configuré → vérification
+        if (Hash::check($request->cin, $trainee->password)) {
+            $request->session()->put('trainee_id', $trainee->id);
+
+            // Si le mot de passe est encore le CIN par défaut → première connexion → forcer changement
+            if (Hash::check($trainee->cin, $trainee->password)) {
+                $request->session()->put('first_login', true);
+                return redirect()->route('trainee.password.setup');
+            }
+
+            return redirect()->route('trainee.dashboard');
         }
 
         return back()->with('error', 'Informations incorrectes. Veuillez vérifier vos accès.');
@@ -50,17 +61,16 @@ class TraineeAuthController extends Controller
 
     public function showPasswordSetupForm(Request $request)
     {
-        // Ensure trainee is in session but has no password yet
         if (!$request->session()->has('trainee_id')) {
             return redirect()->route('trainee.login');
         }
 
-        $trainee = Trainee::find($request->session()->get('trainee_id'));
-        if (!$trainee || !empty($trainee->password)) {
-            return redirect()->route('trainee.dashboard');
+        $trainee = Trainee::query()->find($request->session()->get('trainee_id'));
+        if (!$trainee) {
+            return redirect()->route('trainee.login');
         }
 
-        return view('portal.password_setup');
+        return view('portal.password_setup', compact('trainee'));
     }
 
     public function setupPassword(Request $request)
@@ -69,45 +79,50 @@ class TraineeAuthController extends Controller
             return redirect()->route('trainee.login');
         }
 
-        $trainee = Trainee::find($request->session()->get('trainee_id'));
-        if (!$trainee || !empty($trainee->password)) {
-            return redirect()->route('trainee.dashboard');
+        $trainee = Trainee::query()->find($request->session()->get('trainee_id'));
+        if (!$trainee) {
+            return redirect()->route('trainee.login');
         }
 
         $request->validate([
-            'password' => 'required|min:6|confirmed',
+            'password'              => 'required|min:6|confirmed',
+            'password_confirmation' => 'required',
         ]);
 
+        // Sauvegarder le nouveau mot de passe
         $trainee->password = bcrypt($request->password);
         $trainee->save();
 
+        // Notifier l'administration (visible dans /admin/password-requests)
         DocumentRequest::create([
-            'trainee_id' => $trainee->id,
-            'document_type' => 'Configuration Mot de passe',
-            'status' => 'en_attente',
+            'trainee_id'    => $trainee->id,
+            'document_type' => 'Activation Compte',
+            'status'        => 'en_attente',
             'admin_message' => $request->password,
         ]);
 
-        return redirect()->route('trainee.dashboard')->with('success', 'Votre mot de passe a été configuré avec succès !');
+        $request->session()->forget('first_login');
+
+        return redirect()->route('trainee.dashboard')
+            ->with('success', 'Bienvenue ! Votre mot de passe a été configuré avec succès. 🎉');
     }
 
     public function requestPasswordReset(Request $request)
     {
         $request->validate([
-            'cef' => 'required',
+            'cef'           => 'required',
             'date_naissance' => 'required|date'
         ]);
 
-        $trainee = Trainee::where('cef', trim($request->cef))
-            ->whereDate('date_naissance', $request->date_naissance)
+        $trainee = Trainee::query()->where('cef', '=', trim($request->cef))
+            ->whereDate('date_naissance', '=', $request->date_naissance)
             ->first();
 
         if (!$trainee) {
             return back()->with('error', 'Aucun stagiaire trouvé avec ces informations.');
         }
 
-        // Check if there's already a pending password reset request
-        $existing = DocumentRequest::where('trainee_id', $trainee->id)
+        $existing = DocumentRequest::query()->where('trainee_id', '=', $trainee->id)
             ->where('document_type', 'Changement Mot de passe')
             ->where('status', 'en_attente')
             ->first();
@@ -117,9 +132,9 @@ class TraineeAuthController extends Controller
         }
 
         DocumentRequest::create([
-            'trainee_id' => $trainee->id,
+            'trainee_id'    => $trainee->id,
             'document_type' => 'Changement Mot de passe',
-            'status' => 'en_attente',
+            'status'        => 'en_attente',
         ]);
 
         return back()->with('success', 'Votre demande de réinitialisation a été envoyée à l\'administration avec succès.');

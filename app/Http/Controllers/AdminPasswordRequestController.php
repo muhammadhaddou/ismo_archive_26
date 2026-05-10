@@ -11,7 +11,7 @@ class AdminPasswordRequestController extends Controller
     public function index(Request $request)
     {
         $query = DocumentRequest::with('trainee.filiere')
-            ->whereIn('document_type', ['Changement Mot de passe', 'Configuration Mot de passe']);
+            ->whereIn('document_type', ['Changement Mot de passe', 'Configuration Mot de passe', 'Activation Compte']);
 
         // Search logic
         if ($request->has('search') && $request->search != '') {
@@ -28,8 +28,7 @@ class AdminPasswordRequestController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
             
-        // Mark as read when admin visits the inbox (optional, we can use a separate flag or reuse the existing one)
-        DocumentRequest::whereIn('document_type', ['Changement Mot de passe', 'Configuration Mot de passe'])
+        DocumentRequest::query()->whereIn('document_type', ['Changement Mot de passe', 'Configuration Mot de passe', 'Activation Compte'])
             ->where('is_read_by_admin', false)
             ->update(['is_read_by_admin' => true]);
 
@@ -38,11 +37,11 @@ class AdminPasswordRequestController extends Controller
 
     public function approve(DocumentRequest $docRequest)
     {
-        if (!in_array($docRequest->document_type, ['Changement Mot de passe', 'Configuration Mot de passe'])) {
+        if (!in_array($docRequest->document_type, ['Changement Mot de passe', 'Configuration Mot de passe', 'Activation Compte'])) {
             abort(403);
         }
 
-        if ($docRequest->document_type === 'Configuration Mot de passe') {
+        if (in_array($docRequest->document_type, ['Configuration Mot de passe', 'Activation Compte'])) {
             $docRequest->update(['status' => 'termine']);
             return back()->with('success', 'Notification marquée comme lue.');
         }

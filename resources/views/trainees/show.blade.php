@@ -18,7 +18,7 @@
                 <a href="{{ route('validations.show', $trainee) }}"
                    class="btn btn-success me-2">
                     <i class="fas fa-check-circle"></i> Voir validation
-                    <span class="badge bg-light">
+                    <span class="badge bg-light text-dark">
                         {{ \Carbon\Carbon::parse($trainee->validation->date_validation)->format('d/m/Y') }}
                     </span>
                 </a>

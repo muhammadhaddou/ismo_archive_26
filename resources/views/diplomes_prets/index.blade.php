@@ -68,7 +68,7 @@
 
 <div class="card">
     <div class="card-body table-responsive">
-        <table id="prets-table" class="table table-bordered table-hover">
+        <table id="prets-table" class="table table-bordered table-hover table-vcenter">
             <thead class="bg-success text-white">
                 <tr>
                     <th>#</th>

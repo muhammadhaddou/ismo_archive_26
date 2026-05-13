@@ -30,13 +30,6 @@
       }
     </style>
     @yield('css')
-    <script>
-        // Appliquer le thème immédiatement pour éviter le flash blanc
-        (function() {
-            var t = localStorage.getItem('tablerTheme') || 'light';
-            document.documentElement.setAttribute('data-bs-theme', t);
-        })();
-    </script>
 </head>
 <body >
     <div class="page">
@@ -206,10 +199,6 @@
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="navbar-nav flex-row order-md-last align-items-center gap-2">
-            <!-- Toggle Mode Clair/Sombre -->
-            <button id="theme-toggle" class="btn btn-sm btn-ghost-secondary" title="Changer le thème" style="width:36px;height:36px;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s;">
-                <i id="theme-icon" class="ti ti-moon fs-4"></i>
-            </button>
             <div class="nav-item dropdown ms-3">
               <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown" aria-label="Open user menu">
                 <span class="avatar avatar-sm" style="background-color: #206bc4; color: white;">{{ substr(Auth::user()->name ?? 'A', 0, 1) }}</span>
@@ -276,36 +265,6 @@
       });
     </script>
 
-    <!-- Theme Toggle Script -->
-    <script>
-        (function() {
-            var icon = document.getElementById('theme-icon');
-            var btn  = document.getElementById('theme-toggle');
-            if (!btn) return;
-
-            // Mettre l'icône selon le thème actuel
-            function syncIcon() {
-                var current = document.documentElement.getAttribute('data-bs-theme');
-                if (current === 'dark') {
-                    icon.className = 'ti ti-sun fs-4';
-                    btn.style.color = '#f59f00';
-                } else {
-                    icon.className = 'ti ti-moon fs-4';
-                    btn.style.color = '';
-                }
-            }
-
-            syncIcon();
-
-            btn.addEventListener('click', function() {
-                var current = document.documentElement.getAttribute('data-bs-theme');
-                var next = current === 'dark' ? 'light' : 'dark';
-                document.documentElement.setAttribute('data-bs-theme', next);
-                localStorage.setItem('tablerTheme', next);
-                syncIcon();
-            });
-        })();
-    </script>
     @yield('js')
 </body>
 </html>

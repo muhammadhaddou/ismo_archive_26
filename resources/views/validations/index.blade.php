@@ -123,7 +123,7 @@
                         </a>
                     </td>
                     <td>
-                        <span class="badge bg-light border">{{ $trainee->cin }}</span>
+                        <span class="badge bg-light border text-dark">{{ $trainee->cin }}</span>
                         @if($trainee->cef)
                             <br><small class="text-muted">{{ $trainee->cef }}</small>
                         @endif

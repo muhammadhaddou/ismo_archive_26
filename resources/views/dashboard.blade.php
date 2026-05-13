@@ -37,6 +37,16 @@
 @endsection
 
 @section('content')
+<style>
+    .clickable-card {
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .clickable-card:hover {
+        box-shadow: 0 8px 15px rgba(0,0,0,0.08) !important;
+        background-color: #f8f9fa;
+    }
+</style>
 
 {{-- 🔴 Alerte globale (Bacs expirés) --}}
 @if($stats['bac_expired'] > 0)
@@ -63,7 +73,7 @@
 <div class="row row-deck row-cards mb-4">
     <!-- Total Stagiaires -->
     <div class="col-sm-6 col-lg-3">
-        <div class="card card-sm shadow-sm border-0 rounded-3">
+        <div class="card card-sm shadow-sm border-0 rounded-3 clickable-card" onclick="window.location.href='{{ route('trainees.index') }}'">
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-auto">
@@ -84,7 +94,7 @@
     
     <!-- Mouvements Aujourd'hui -->
     <div class="col-sm-6 col-lg-3">
-        <div class="card card-sm shadow-sm border-0 rounded-3">
+        <div class="card card-sm shadow-sm border-0 rounded-3 clickable-card" onclick="window.location.href='{{ route('movements.today') }}'">
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-auto">
@@ -105,7 +115,7 @@
 
     <!-- Diplômes Prêts -->
     <div class="col-sm-6 col-lg-3">
-        <div class="card card-sm shadow-sm border-0 rounded-3">
+        <div class="card card-sm shadow-sm border-0 rounded-3 clickable-card" onclick="window.location.href='{{ route('diplomes.prets') }}'">
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-auto">
@@ -126,7 +136,7 @@
 
     <!-- Bacs en Sortie -->
     <div class="col-sm-6 col-lg-3">
-        <div class="card card-sm shadow-sm border-0 rounded-3">
+        <div class="card card-sm shadow-sm border-0 rounded-3 clickable-card" onclick="window.location.href='{{ url('documents/bac/temp-out') }}'">
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-auto">

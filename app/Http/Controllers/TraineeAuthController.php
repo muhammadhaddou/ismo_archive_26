@@ -27,26 +27,50 @@ class TraineeAuthController extends Controller
             return back()->with('error', 'Informations incorrectes. Veuillez vérifier vos accès.');
         }
 
-        // Cas 1 : Aucun mot de passe → CIN comme accès provisoire (première connexion)
+        $inputPassword = trim($request->cin);
+        $dbCin = trim($trainee->cin);
+        
+        $isAuthenticated = false;
+        $isFirstLogin = false;
+
         if (empty($trainee->password)) {
-            if (trim($request->cin) === $trainee->cin) {
-                $request->session()->put('trainee_id', $trainee->id);
-                $request->session()->put('first_login', true);
-                return redirect()->route('trainee.password.setup');
+            // Cas 1 : Aucun mot de passe → CIN comme accès provisoire (insensible à la casse)
+            if (strcasecmp($inputPassword, $dbCin) === 0) {
+                $isAuthenticated = true;
+                $isFirstLogin = true;
             }
-            return back()->with('error', 'Informations incorrectes. Veuillez vérifier vos accès.');
+        } else {
+            // Cas 2 : Mot de passe configuré → on vérifie s'il est hashé ou non
+            $info = Hash::info($trainee->password);
+            $isHashed = $info['algoName'] !== 'unknown';
+            
+            if ($isHashed) {
+                if (Hash::check($inputPassword, $trainee->password)) {
+                    $isAuthenticated = true;
+                    // Si le mot de passe est encore le CIN par défaut → forcer changement
+                    if (Hash::check($dbCin, $trainee->password) || 
+                        Hash::check(strtolower($dbCin), $trainee->password) || 
+                        Hash::check(strtoupper($dbCin), $trainee->password)) {
+                        $isFirstLogin = true;
+                    }
+                }
+            } else {
+                // Le mot de passe n'est pas hashé (cas d'une importation directe ou ancienne DB)
+                if ($inputPassword === $trainee->password || strcasecmp($inputPassword, $dbCin) === 0) {
+                    $isAuthenticated = true;
+                    $isFirstLogin = true; // Forcer le hashage via setup
+                }
+            }
         }
 
-        // Cas 2 : Mot de passe configuré → vérification
-        if (Hash::check($request->cin, $trainee->password)) {
+        if ($isAuthenticated) {
             $request->session()->put('trainee_id', $trainee->id);
-
-            // Si le mot de passe est encore le CIN par défaut → première connexion → forcer changement
-            if (Hash::check($trainee->cin, $trainee->password)) {
+            
+            if ($isFirstLogin) {
                 $request->session()->put('first_login', true);
                 return redirect()->route('trainee.password.setup');
             }
-
+            
             return redirect()->route('trainee.dashboard');
         }
 

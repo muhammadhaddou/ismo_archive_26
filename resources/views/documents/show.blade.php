@@ -195,8 +195,8 @@
                     @endif
                 @else
                     {{-- En stock : sortie possible --}}
-                    <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#sortieModal">
-                        <i class="ti ti-logout me-1"></i>Retrait
+                    <button class="btn btn-warning w-100 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#sortieModal">
+                        <i class="ti ti-logout me-2"></i> Nouveau retrait
                     </button>
                 @endif
             </div>

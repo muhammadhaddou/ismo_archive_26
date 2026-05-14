@@ -396,6 +396,30 @@
                                 <input type="file" name="signature_file" id="prom-signature" class="form-control-file" accept=".jpg,.jpeg,.png">
                             </div>
                         </div>
+                    {{-- Procuration --}}
+                    <div class="card border-warning mb-2">
+                        <div class="card-header bg-warning-lt py-1">
+                            <label class="form-check form-switch mb-0">
+                                <input type="checkbox" class="form-check-input" id="prom-is-proxy" name="is_proxy" value="1">
+                                <span class="form-check-label fw-bold">Par procuration (ولي الأمر / بوكالة)</span>
+                            </label>
+                        </div>
+                        <div class="card-body py-2 bg-light" id="promProxyFields" style="display:none;">
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label fw-bold small">Nom du mandataire</label>
+                                    <input type="text" id="prom-proxy-name" class="form-control form-control-sm" placeholder="Nom complet">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label fw-bold small">CIN du mandataire</label>
+                                    <input type="text" id="prom-proxy-cin" class="form-control form-control-sm" placeholder="Ex: AB123456">
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label fw-bold small">Procuration (fichier PDF/Image)</label>
+                                    <input type="file" id="prom-proxy-document" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png">
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div id="promoteResult" class="mt-2" style="display:none"></div>
@@ -459,10 +483,22 @@ $('#modalPromouvoir').on('show.bs.modal', function () {
     $('#btnConfirmPromote').hide();
     $('#promoteResult').hide();
     // reset file inputs
-    ['scan_bac','scan_diplome','scan_attestation','scan_bulletin','prom-signature'].forEach(id => {
+    ['scan_bac','scan_diplome','scan_attestation','scan_bulletin','prom-signature','prom-proxy-document'].forEach(id => {
         const el = document.getElementById(id);
         if(el) el.value = '';
     });
+    $('#prom-is-proxy').prop('checked', false);
+    $('#promProxyFields').hide();
+    $('#prom-proxy-name, #prom-proxy-cin').val('');
+});
+
+// Toggle proxy fields
+$('#prom-is-proxy').on('change', function() {
+    if ($(this).is(':checked')) {
+        $('#promProxyFields').slideDown(200);
+    } else {
+        $('#promProxyFields').slideUp(200);
+    }
 });
 
 // Live search
@@ -530,6 +566,14 @@ $('#btnConfirmPromote').on('click', function () {
     });
     const sig = document.getElementById('prom-signature');
     if (sig && sig.files[0]) fd.append('signature_file', sig.files[0]);
+
+    if ($('#prom-is-proxy').is(':checked')) {
+        fd.append('is_proxy', 1);
+        fd.append('proxy_name', $('#prom-proxy-name').val());
+        fd.append('proxy_cin', $('#prom-proxy-cin').val());
+        const proxyDoc = document.getElementById('prom-proxy-document');
+        if (proxyDoc && proxyDoc.files[0]) fd.append('proxy_document', proxyDoc.files[0]);
+    }
 
     $.ajax({
         url: `/diplomes-prets/${traineeId}/check-promote`,

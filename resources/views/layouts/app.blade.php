@@ -251,6 +251,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="{{ asset('js/sweetalert2.all.min.js') }}"></script>
     
     <!-- Bootstrap 4 to 5 polyfill helpers (simplistic) -->
     <script>

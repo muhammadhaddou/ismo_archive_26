@@ -139,10 +139,9 @@
                         <form action="{{ route('documents.retour', $doc) }}"
                               method="POST" style="display:inline">
                             @csrf
-                            <button type="submit"
-                                    class="btn btn-sm btn-success"
-                                    title="Confirmer le retour"
-                                    onclick="return confirm('Confirmer le retour du Bac?')">
+                            <button type="button"
+                                    class="btn btn-sm btn-success btn-confirm-retour"
+                                    title="Confirmer le retour">
                                 <i class="fas fa-undo"></i> Retour
                             </button>
                         </form>
@@ -174,5 +173,36 @@
         "order": [[8, "desc"]]
     });
     $('.select2').select2();
+
+    $(document).on('click', '.btn-confirm-retour', function(e) {
+        e.preventDefault();
+        let form = $(this).closest('form');
+        
+        Swal.fire({
+            title: 'Confirmer le retour',
+            html: "Êtes-vous sûr de vouloir confirmer le retour de ce document en stock ?<br><br><small class='text-muted'>Cette action mettra à jour le statut du document.</small>",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-check"></i> Oui, confirmer',
+            cancelButtonText: '<i class="fas fa-times"></i> Annuler',
+            customClass: {
+                confirmButton: 'btn btn-success me-2',
+                cancelButton: 'btn btn-secondary'
+            },
+            buttonsStyling: false,
+            backdrop: `rgba(0,0,0,0.4)`
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Traitement en cours...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                form.submit();
+            }
+        });
+    });
 </script>
 @stop

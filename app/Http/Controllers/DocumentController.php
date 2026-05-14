@@ -113,7 +113,7 @@ class DocumentController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        $filieres = Filiere::orderBy('code_filiere')->get();
+        $filieres = Filiere::orderBy('code_filiere', 'asc')->get();
 
         return view('documents.index', compact('documents', 'type', 'filieres'));
     }
@@ -135,38 +135,65 @@ class DocumentController extends Controller
             'level_year'       => 'nullable|in:1,2',
             'reference_number' => 'nullable|string|max:100',
             'scan_file'        => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'is_proxy'         => 'nullable|boolean',
+            'proxy_name'       => 'nullable|string|required_if:is_proxy,1',
+            'proxy_cin'        => 'nullable|string|required_if:is_proxy,1',
+            'proxy_document'   => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120|required_if:is_proxy,1',
         ]);
 
         $trainee = Trainee::findOrFail($request->trainee_id);
 
-        // 🚫 Un document de ce type existe déjà pour ce stagiaire
-        $exists = $trainee->documents()->where('type', $request->type)->exists();
-        if ($exists) {
-            return redirect()->back()->with('error',
-                "❌ Ce stagiaire possède déjà un document de type « {$request->type} » dans le système."
-            );
+        $status = $request->bac_status ?? 'Stock';
+        $actionType = ($status !== 'Stock') ? 'Sortie' : 'Saisie';
+
+        $existingDoc = $trainee->documents()->where('type', $request->type)->first();
+
+        if ($existingDoc) {
+            if ($actionType === 'Saisie') {
+                return redirect()->back()->with('error',
+                    "❌ Ce stagiaire possède déjà un document de type « {$request->type} » en stock."
+                );
+            }
+            if ($existingDoc->status === 'Final_Out' || $existingDoc->status === 'Remis') {
+                return redirect()->back()->with('error',
+                    "❌ Ce document est déjà retiré définitivement."
+                );
+            }
+            if ($existingDoc->status === 'Temp_Out' && $status === 'Temp_Out') {
+                return redirect()->back()->with('error',
+                    "❌ Ce document est déjà en retrait temporaire."
+                );
+            }
+
+            $document = $existingDoc;
+            $document->status = $status;
+            if ($request->level_year) $document->level_year = $request->level_year;
+            if ($request->reference_number) $document->reference_number = $request->reference_number;
+
+            if ($request->hasFile('scan_file')) {
+                $document->scan_file = $request->file('scan_file')->store('documents_scans', 'local');
+            }
+            $document->save();
+        } else {
+            $scanPath = null;
+            if ($request->hasFile('scan_file')) {
+                $scanPath = $request->file('scan_file')->store('documents_scans', 'local');
+            }
+
+            $document = Document::create([
+                'trainee_id'       => $request->trainee_id,
+                'type'             => $request->type,
+                'level_year'       => $request->level_year,
+                'status'           => $status,
+                'reference_number' => $request->reference_number,
+                'scan_file'        => $scanPath,
+            ]);
         }
 
-        // Statut initial : Bac peut être saisi directement en Temp_Out/Final_Out
-        $status = $request->type === 'Bac'
-            ? ($request->bac_status ?? 'Temp_Out')
-            : 'Stock';
-
-        $scanPath = null;
-        if ($request->hasFile('scan_file')) {
-            $scanPath = $request->file('scan_file')->store('documents_scans', 'local');
+        $proxyPath = null;
+        if ($request->hasFile('proxy_document')) {
+            $proxyPath = $request->file('proxy_document')->store('procurations', 'local');
         }
-
-        $document = Document::create([
-            'trainee_id'       => $request->trainee_id,
-            'type'             => $request->type,
-            'level_year'       => $request->level_year,
-            'status'           => $status,
-            'reference_number' => $request->reference_number,
-            'scan_file'        => $scanPath,
-        ]);
-
-        $actionType = ($request->type === 'Bac' && $status !== 'Stock') ? 'Sortie' : 'Saisie';
 
         $this->recordMovement($document, $actionType, [
             'doc_status' => $status,
@@ -176,6 +203,10 @@ class DocumentController extends Controller
                     'Final_Out' => 'Retrait définitif',
                     default     => 'Document enregistré en stock',
                 },
+                'is_proxy'            => $request->boolean('is_proxy'),
+                'proxy_name'          => $request->proxy_name,
+                'proxy_cin'           => $request->proxy_cin,
+                'proxy_document_path' => $proxyPath,
             ],
         ]);
 

@@ -163,6 +163,25 @@
 
             </div>
 
+            <!-- Documents Initiaux -->
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div class="form-group border p-3 rounded bg-light">
+                        <label class="mb-2"><i class="fas fa-folder-plus text-primary"></i> Documents initiaux à ajouter (En stock)</label>
+                        <div class="d-flex flex-wrap gap-4 mt-2">
+                            @foreach(['Bac', 'Diplome', 'Attestation', 'Bulletin'] as $docType)
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" name="documents[]" value="{{ $docType }}" 
+                                       class="custom-control-input" id="doc_{{ $docType }}" checked>
+                                <label class="custom-control-label fw-normal" for="doc_{{ $docType }}">{{ $docType }}</label>
+                            </div>
+                            @endforeach
+                        </div>
+                        <small class="text-muted d-block mt-2">Ces documents seront créés avec le statut "En stock" pour l'année de promotion sélectionnée.</small>
+                    </div>
+                </div>
+            </div>
+
             <button class="btn btn-primary mt-3">Enregistrer</button>
         </form>
     </div>

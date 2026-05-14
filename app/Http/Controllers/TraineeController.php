@@ -77,6 +77,8 @@ class TraineeController extends Controller
             'cin_pere_scan'   => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'cin_mere_scan'   => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'image_profile'   => 'nullable|image|max:5120',
+            'documents'       => 'nullable|array',
+            'documents.*'     => 'string|in:Bac,Diplome,Attestation,Bulletin',
         ]);
 
         if ($request->hasFile('cin_scan')) {
@@ -92,7 +94,18 @@ class TraineeController extends Controller
             $validated['image_profile'] = $request->file('image_profile')->store('profiles', 'public');
         }
 
-        Trainee::create($validated);
+        $trainee = Trainee::create($validated);
+
+        if (!empty($request->documents)) {
+            foreach ($request->documents as $type) {
+                \App\Models\Document::create([
+                    'trainee_id' => $trainee->id,
+                    'type'       => $type,
+                    'status'     => 'Stock',
+                    'level_year' => $trainee->graduation_year,
+                ]);
+            }
+        }
 
         return redirect()->route('trainees.index')
                          ->with('success', 'Stagiaire ajouté avec succès ✅');

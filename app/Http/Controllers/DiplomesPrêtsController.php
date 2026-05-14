@@ -61,6 +61,17 @@ class DiplomesPrêtsController extends Controller
 
         $existingDocs = $trainee->documents->keyBy('type');
 
+        // Enregistrer le document proxy une seule fois en dehors de la boucle pour le partager
+        $proxyPath = null;
+        if ($request->hasFile('proxy_document') && $request->boolean('is_proxy')) {
+            $file = $request->file('proxy_document');
+            $proxyPath = $file->storeAs(
+                'procurations',
+                'proxy_promo_' . $traineeId . '_' . time() . '.' . $file->getClientOriginalExtension(),
+                'local'
+            );
+        }
+
         foreach ($docConfig as $type => $config) {
             $targetStatus = $config['status'];
             $scanField    = $config['field'];
@@ -76,18 +87,25 @@ class DiplomesPrêtsController extends Controller
                 );
             }
 
+            $movementData = [
+                'user_id'             => Auth::id() ?? 1,
+                'action_type'         => 'Sortie',
+                'date_action'         => now(),
+                'observations'        => 'Remise automatique suite à diplomation',
+                'is_proxy'            => $request->boolean('is_proxy'),
+                'proxy_name'          => $request->proxy_name,
+                'proxy_cin'           => $request->proxy_cin,
+                'proxy_document_path' => $proxyPath,
+            ];
+
             if ($existingDocs->has($type)) {
                 $doc = $existingDocs->get($type);
                 $updateData = ['status' => $targetStatus];
                 if ($scanPath) $updateData['scan_file'] = $scanPath;
                 $doc->update($updateData);
-                \App\Models\Movement::create([
-                    'document_id' => $doc->id,
-                    'user_id'     => Auth::id() ?? 1,
-                    'action_type' => 'Sortie',
-                    'date_action' => now(),
-                    'notes'       => 'Remise automatique suite à diplomation',
-                ]);
+
+                $movementData['document_id'] = $doc->id;
+                \App\Models\Movement::create($movementData);
             } else {
                 $docData = [
                     'trainee_id' => $trainee->id,
@@ -96,13 +114,9 @@ class DiplomesPrêtsController extends Controller
                 ];
                 if ($scanPath) $docData['scan_file'] = $scanPath;
                 $doc = \App\Models\Document::create($docData);
-                \App\Models\Movement::create([
-                    'document_id' => $doc->id,
-                    'user_id'     => Auth::id() ?? 1,
-                    'action_type' => 'Sortie',
-                    'date_action' => now(),
-                    'notes'       => 'Création et remise automatique suite à diplomation',
-                ]);
+
+                $movementData['document_id'] = $doc->id;
+                \App\Models\Movement::create($movementData);
             }
         }
 

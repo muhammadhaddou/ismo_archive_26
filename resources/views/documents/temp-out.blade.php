@@ -226,7 +226,7 @@
                             </a>
                             <form action="{{ route('documents.retour', $doc) }}" method="POST" style="display:inline">
                                 @csrf
-                                <button type="submit" class="btn btn-sm btn-outline-success" onclick="return confirm('Confirmer le retour du Bac?')" title="Retour en stock">
+                                <button type="button" class="btn btn-sm btn-outline-success btn-confirm-retour" title="Retour en stock">
                                     <i class="ti ti-arrow-back-up me-1"></i>Retour
                                 </button>
                             </form>
@@ -443,5 +443,38 @@
             $('#scan-result-' + currentDocId).show();
         }
     })();
+
+    // ========== CONFIRMATION DE RETOUR ==========
+    $(document).on('click', '.btn-confirm-retour', function(e) {
+        e.preventDefault();
+        let form = $(this).closest('form');
+        
+        Swal.fire({
+            title: 'Confirmer le retour',
+            html: "Êtes-vous sûr de vouloir réintégrer ce document dans le stock ?<br><br><small class='text-muted'>Ceci mettra fin au retrait temporaire.</small>",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '<i class="ti ti-check me-1"></i> Oui, confirmer',
+            cancelButtonText: '<i class="ti ti-x me-1"></i> Annuler',
+            customClass: {
+                confirmButton: 'btn btn-success me-2',
+                cancelButton: 'btn btn-secondary'
+            },
+            buttonsStyling: false,
+            backdrop: `rgba(0,0,0,0.4)`
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Mise à jour...',
+                    text: 'Veuillez patienter',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                form.submit();
+            }
+        });
+    });
 </script>
 @stop

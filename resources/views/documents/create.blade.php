@@ -152,23 +152,55 @@
                             </div>
                         </div>
                         <input type="hidden" name="bac_status" id="bac-status-input" value="Temp_Out">
-                        <small class="text-muted mt-1 d-block">
+                        <small class="text-muted mt-1 d-block mb-3">
                             <i class="fas fa-hand-pointer"></i> Cliquez sur un type pour le sélectionner
                         </small>
+
+                        {{-- Procuration --}}
+                        <div class="card bg-light border-0 shadow-none">
+                            <div class="card-body p-2">
+                                <label class="form-check form-switch mb-2">
+                                    <input type="checkbox" class="form-check-input" id="isProxyCheckBac" name="is_proxy" value="1">
+                                    <span class="form-check-label fw-bold small">Par procuration (ولي الأمر / بوكالة)</span>
+                                </label>
+                                <div id="proxyFieldsBac" style="display:none;">
+                                    <input type="text" name="proxy_name" class="form-control form-control-sm mb-1" placeholder="Nom du mandataire">
+                                    <input type="text" name="proxy_cin" class="form-control form-control-sm mb-1" placeholder="CIN du mandataire">
+                                    <input type="file" name="proxy_document" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 @else
-                {{-- Bac type (caché, déclenché si type=Bac dans le select) --}}
+                {{-- Section Action & Procuration --}}
                 <div class="col-md-6 mb-3" id="bac-status-div" style="display:none">
                     <div class="form-group">
-                        <label class="font-weight-bold">
-                            <i class="fas fa-exchange-alt me-1 text-warning"></i>
-                            Type de retrait <span class="text-danger">*</span>
-                        </label>
-                        <select name="bac_status" class="form-control">
-                            <option value="Temp_Out">🟡 Retrait temporaire (retour sous 48h)</option>
-                            <option value="Final_Out">🔴 Retrait définitif</option>
-                        </select>
+                        <div id="bac-status-select-container">
+                            <label class="font-weight-bold">
+                                <i class="fas fa-exchange-alt me-1 text-warning"></i>
+                                Action / Type de retrait <span class="text-danger">*</span>
+                            </label>
+                            <select name="bac_status" id="bac-status-select" class="form-control mb-2">
+                                <option value="Final_Out" selected>🔴 Retrait définitif / Remis au stagiaire</option>
+                                <option value="Temp_Out">🟡 Retrait temporaire (retour sous 48h)</option>
+                            </select>
+                        </div>
+                        
+                        {{-- Procuration --}}
+                        <div class="card bg-light border-0 shadow-none mt-2" id="proxy-card-non-bac">
+                            <div class="card-body p-2">
+                                <label class="form-check form-switch mb-2">
+                                    <input type="checkbox" class="form-check-input" id="isProxyCheckNonBac" name="is_proxy" value="1">
+                                    <span class="form-check-label fw-bold small">Par procuration (ولي الأمر / بوكالة)</span>
+                                </label>
+                                <div id="proxyFieldsNonBac" style="display:none;">
+                                    <input type="text" name="proxy_name" class="form-control form-control-sm mb-1" placeholder="Nom du mandataire">
+                                    <input type="text" name="proxy_cin" class="form-control form-control-sm mb-1" placeholder="CIN du mandataire">
+                                    <input type="file" name="proxy_document" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -264,6 +296,23 @@ $traineesData = $trainees->map(function($t) {
 
 @section('js')
 <script>
+// Toggle Proxy Fields
+document.addEventListener('DOMContentLoaded', function() {
+    const checkBac = document.getElementById('isProxyCheckBac');
+    if (checkBac) {
+        checkBac.addEventListener('change', function() {
+            document.getElementById('proxyFieldsBac').style.display = this.checked ? 'block' : 'none';
+        });
+    }
+
+    const checkNonBac = document.getElementById('isProxyCheckNonBac');
+    if (checkNonBac) {
+        checkNonBac.addEventListener('change', function() {
+            document.getElementById('proxyFieldsNonBac').style.display = this.checked ? 'block' : 'none';
+        });
+    }
+});
+
 // ===== Données des stagiaires pour la recherche =====
 var trainees = {!! json_encode($traineesData) !!};
 
@@ -368,9 +417,24 @@ $(function() {
     function updateFields(type) {
         $('#bac-status-div').hide();
         $('#level-year-div').hide();
-        if (type === 'Bac') {
+        
+        // Reset select UI
+        $('#bac-status-select-container').show();
+        $('#bac-status-select').prop('disabled', false);
+
+        if (type) {
             $('#bac-status-div').fadeIn(200);
-        } else if (type === 'Bulletin') {
+        }
+        
+        if (type === 'Bac') {
+            // keep default behavior
+        } else if (type === 'Attestation' || type === 'Bulletin') {
+            // Hide the choices, it's just a normal withdrawal (Remis)
+            $('#bac-status-select-container').hide();
+            $('#bac-status-select').val('Final_Out').trigger('change');
+        }
+
+        if (type === 'Bulletin') {
             $('#level-year-div').fadeIn(200);
         }
     }

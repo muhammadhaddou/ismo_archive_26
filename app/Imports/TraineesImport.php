@@ -89,7 +89,18 @@ class TraineesImport implements SkipsEmptyRows, ToModel, WithHeadingRow, WithChu
             'password' => $this->pick($row, ['password', 'mot_de_passe']),
         ];
 
-        Trainee::updateOrCreate(['cin' => $cin], $data);
+        $trainee = Trainee::updateOrCreate(['cin' => $cin], $data);
+
+        $docsToCreate = ['Bac', 'Diplome', 'Attestation', 'Bulletin'];
+        foreach($docsToCreate as $type) {
+            \App\Models\Document::firstOrCreate([
+                'trainee_id' => $trainee->id,
+                'type' => $type
+            ], [
+                'status' => 'Stock',
+                'level_year' => $trainee->graduation_year,
+            ]);
+        }
 
         return null;
     }

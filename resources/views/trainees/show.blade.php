@@ -242,13 +242,15 @@
                                     </a>
                                     @endif
                                     {{-- Bouton upload scan --}}
-                                    <button type="button"
-                                            class="btn btn-xs btn-outline-secondary"
-                                            style="font-size:11px"
-                                            data-toggle="modal"
-                                            data-target="#scanModal{{ $doc->id }}">
-                                        <i class="fas fa-upload"></i> {{ $doc->scan_file ? 'Remplacer' : 'Upload Scan' }}
-                                    </button>
+                                    @if($doc->status !== 'Stock')
+                                        <button type="button"
+                                                class="btn btn-xs btn-outline-secondary"
+                                                style="font-size:11px"
+                                                data-toggle="modal"
+                                                data-target="#scanModal{{ $doc->id }}">
+                                            <i class="fas fa-upload"></i> {{ $doc->scan_file ? 'Remplacer' : 'Upload Scan' }}
+                                        </button>
+                                    @endif
                                 </div>
                             @else
                                 <br>
@@ -324,7 +326,7 @@
 {{-- Modals Upload Scan (un par document) --}}
 @foreach(['Bac','Diplome','Attestation','Bulletin'] as $type)
 @php $doc = $trainee->documents->where('type', $type)->first(); @endphp
-@if($doc)
+@if($doc && $doc->status !== 'Stock')
 <div class="modal fade" id="scanModal{{ $doc->id }}" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">

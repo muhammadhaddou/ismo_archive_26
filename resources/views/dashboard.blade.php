@@ -28,7 +28,9 @@
                     <li><hr class="dropdown-divider"></li>
                     <li><h6 class="dropdown-header text-uppercase">Documents</h6></li>
                     <li><a class="dropdown-item py-2" href="{{ route('documents.create') }}?type=Bac"><i class="fas fa-graduation-cap text-warning me-3 w-4"></i> Nouveau Retrait Bac</a></li>
-                    <li><a class="dropdown-item py-2" href="{{ route('diplomes.prets') }}"><i class="fas fa-scroll text-info me-3 w-4"></i> Nouvelle Remise Diplôme</a></li>
+                    <li><a class="dropdown-item py-2" href="{{ route('documents.create') }}?type=Attestation"><i class="fas fa-clipboard-list text-success me-3 w-4"></i> Nouveau Retrait Attestation</a></li>
+                    <li><a class="dropdown-item py-2" href="{{ route('documents.create') }}?type=Bulletin"><i class="fas fa-chart-line text-info me-3 w-4"></i> Nouveau Retrait Bulletin</a></li>
+                    <li><a class="dropdown-item py-2" href="{{ route('diplomes.prets') }}"><i class="fas fa-scroll text-primary me-3 w-4"></i> Nouvelle Remise Diplôme</a></li>
                 </ul>
             </div>
         </div>
@@ -55,12 +57,12 @@
         <div>
             <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
         </div>
-        <div>
-            <h4 class="alert-title fw-bold mb-1">Action Requise Immédiate</h4>
-            <div class="text-muted text-white"><strong>{{ $stats['bac_expired'] }}</strong> stagiaire(s) ont dépassé le délai autorisé de 48h pour leur Baccalauréat.</div>
+        <div class="text-white">
+            <h4 class="alert-title fw-bold mb-1 text-white">Action Requise Immédiate</h4>
+            <div><strong>{{ $stats['bac_expired'] }}</strong> stagiaire(s) ont dépassé le délai autorisé de 48h pour leur Baccalauréat.</div>
         </div>
         <div class="ms-auto mt-2 mt-md-0 d-flex align-items-center">
-            <a href="{{ url('documents/bac/temp-out') }}" class="btn btn-white btn-sm fw-bold text-danger">
+            <a href="{{ url('documents/bac/ecoule') }}" class="btn btn-white btn-sm fw-bold text-danger">
                 Vérifier maintenant
             </a>
         </div>
@@ -326,7 +328,7 @@
                     @endforeach
                 </div>
                 <div class="card-footer bg-transparent text-center py-3">
-                    <a href="{{ url('documents/bac/temp-out') }}" class="text-danger fw-bold text-decoration-none" style="font-size: 0.85rem;">Voir tous les dossiers en retard <i class="fas fa-arrow-right ms-1"></i></a>
+                    <a href="{{ url('documents/bac/ecoule') }}" class="text-danger fw-bold text-decoration-none" style="font-size: 0.85rem;">Voir tous les dossiers en retard <i class="fas fa-arrow-right ms-1"></i></a>
                 </div>
                 @else
                 <div class="empty py-5">

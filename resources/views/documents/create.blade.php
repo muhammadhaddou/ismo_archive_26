@@ -246,6 +246,18 @@
                     </div>
                 </div>
 
+                {{-- Motif / Explication --}}
+                <div class="col-md-12 mb-3">
+                    <div class="form-group">
+                        <label class="font-weight-bold">
+                            <i class="fas fa-comment-alt me-1 text-secondary"></i>
+                            Motif / Explication du retrait <small class="text-muted">(Optionnel)</small>
+                        </label>
+                        <textarea name="observations" class="form-control" rows="2" placeholder="Ex: Raison du retrait, remise en main propre, etc.">{{ old('observations') }}</textarea>
+                        @error('observations')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                    </div>
+                </div>
+
             </div>{{-- end row --}}
 
             <hr>

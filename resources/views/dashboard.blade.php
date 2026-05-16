@@ -50,7 +50,7 @@
     }
 </style>
 
-{{-- 🔴 Alerte globale (Bacs expirés) --}}
+{{-- 🔴 Alerte globale (Bacs délai dépassé) --}}
 @if($stats['bac_expired'] > 0)
 <div class="alert alert-important alert-danger alert-dismissible shadow-sm rounded-3 mb-4" role="alert">
     <div class="d-flex">
@@ -59,7 +59,7 @@
         </div>
         <div class="text-white">
             <h4 class="alert-title fw-bold mb-1 text-white">Action Requise Immédiate</h4>
-            <div><strong>{{ $stats['bac_expired'] }}</strong> stagiaire(s) ont dépassé le délai autorisé de 48h pour leur Baccalauréat.</div>
+            <div><strong>{{ $stats['bac_expired'] }}</strong> stagiaire(s) ont un délai dépassé (plus de 48h) pour leur Baccalauréat.</div>
         </div>
         <div class="ms-auto mt-2 mt-md-0 d-flex align-items-center">
             <a href="{{ url('documents/bac/ecoule') }}" class="btn btn-white btn-sm fw-bold text-danger">
@@ -115,7 +115,7 @@
         </div>
     </div>
 
-    <!-- Diplômes Prêts -->
+    <!-- Diplômes Disponibles -->
     <div class="col-sm-6 col-lg-3">
         <div class="card card-sm shadow-sm border-0 rounded-3 clickable-card" onclick="window.location.href='{{ route('diplomes.prets') }}'">
             <div class="card-body">
@@ -127,7 +127,7 @@
                     </div>
                     <div class="col">
                         <div class="font-weight-medium text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">
-                            Diplômes Prêts
+                            Diplômes Disponibles
                         </div>
                         <div class="h2 mb-0 fw-bold text-body">{{ $stats['diplomes_prets'] }}</div>
                     </div>
@@ -199,7 +199,7 @@
                     <div class="col-12">
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="d-flex align-items-center text-muted small fw-medium">
-                                <span class="badge bg-primary me-2" style="width: 10px; height: 10px; padding: 0;"></span> En Stock
+                                <span class="badge bg-primary me-2" style="width: 10px; height: 10px; padding: 0;"></span> Disponibles
                             </span>
                             <span class="fw-bold text-body">120</span>
                         </div>
@@ -215,7 +215,7 @@
                     <div class="col-12">
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="d-flex align-items-center text-muted small fw-medium">
-                                <span class="badge bg-danger me-2" style="width: 10px; height: 10px; padding: 0;"></span> Expirés (>48h)
+                                <span class="badge bg-danger me-2" style="width: 10px; height: 10px; padding: 0;"></span> Délai dépassé (>48h)
                             </span>
                             <span class="fw-bold text-danger">{{ $stats['bac_expired'] }}</span>
                         </div>

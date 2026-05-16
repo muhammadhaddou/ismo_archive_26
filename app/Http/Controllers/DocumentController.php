@@ -30,12 +30,26 @@ class DocumentController extends Controller
             ? now()->addHours(48)
             : null;
 
+        $referenceNumber = null;
+        $withdrawalType = null;
+
+        if ($actionType === 'Sortie' && $document->type === 'Bac') {
+            $docStatus = $extras['doc_status'] ?? '';
+            $withdrawalType = $docStatus === 'Temp_Out' ? 'T' : 'D';
+            
+            // Extract a 2-digit study year from graduation_year or annee_etude
+            $studyYearRaw = $document->trainee->graduation_year ?? $document->trainee->annee_etude ?? date('Y');
+            $referenceNumber = app(\App\Services\ReferenceGeneratorService::class)->generate($withdrawalType, $studyYearRaw);
+        }
+
         Movement::create(array_merge([
             'document_id' => $document->id,
             'user_id'     => Auth::id(),
             'action_type' => $actionType,
             'date_action' => now(),
             'deadline'    => $deadline,
+            'reference_number' => $referenceNumber,
+            'withdrawal_type'  => $withdrawalType,
         ], $extras['movement'] ?? []));
     }
 
@@ -134,6 +148,7 @@ class DocumentController extends Controller
             'type'             => 'required|in:Bac,Diplome,Attestation,Bulletin',
             'level_year'       => 'nullable|in:1,2',
             'reference_number' => 'nullable|string|max:100',
+            'observations'     => 'nullable|string|max:500',
             'scan_file'        => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'is_proxy'         => 'nullable|boolean',
             'proxy_name'       => 'nullable|string|required_if:is_proxy,1',
@@ -195,14 +210,16 @@ class DocumentController extends Controller
             $proxyPath = $request->file('proxy_document')->store('procurations', 'local');
         }
 
+        $defaultObservation = match ($status) {
+            'Temp_Out'  => 'Retrait temporaire (48h)',
+            'Final_Out' => 'Retrait définitif',
+            default     => 'Document enregistré en stock',
+        };
+
         $this->recordMovement($document, $actionType, [
             'doc_status' => $status,
             'movement'   => [
-                'observations' => match ($status) {
-                    'Temp_Out'  => 'Retrait temporaire (48h)',
-                    'Final_Out' => 'Retrait définitif',
-                    default     => 'Document enregistré en stock',
-                },
+                'observations' => $request->filled('observations') ? $request->observations : $defaultObservation,
                 'is_proxy'            => $request->boolean('is_proxy'),
                 'proxy_name'          => $request->proxy_name,
                 'proxy_cin'           => $request->proxy_cin,

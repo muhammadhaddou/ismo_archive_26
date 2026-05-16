@@ -115,6 +115,10 @@
                         <th class="ps-3">Promotion</th>
                         <td>{{ $trainee->graduation_year }}</td>
                     </tr>
+                    <tr>
+                        <th class="ps-3 text-muted"><small>Dernière màj.</small></th>
+                        <td class="text-muted"><small>{{ $trainee->updated_at ? $trainee->updated_at->format('d/m/Y H:i') : '—' }}</small></td>
+                    </tr>
                 </table>
             </div>
         </div>
@@ -317,6 +321,81 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        {{-- Historique des modifications du stagiaire --}}
+        <div class="card mt-3">
+            <div class="card-header bg-secondary">
+                <h3 class="card-title text-white">
+                    <i class="fas fa-user-edit"></i> Historique des modifications (Profil)
+                </h3>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Action</th>
+                                <th>Par</th>
+                                <th>Modifications</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($trainee->activities()->latest()->get() as $activity)
+                            <tr>
+                                <td class="text-nowrap">{{ $activity->created_at->format('d/m/Y H:i') }}</td>
+                                <td>
+                                    @if($activity->description === 'created')
+                                        <span class="badge bg-success">Création</span>
+                                    @elseif($activity->description === 'updated')
+                                        <span class="badge bg-warning">Mise à jour</span>
+                                    @elseif($activity->description === 'deleted')
+                                        <span class="badge bg-danger">Suppression</span>
+                                    @else
+                                        <span class="badge bg-secondary">{{ $activity->description }}</span>
+                                    @endif
+                                </td>
+                                <td>{{ $activity->causer->name ?? 'Système' }}</td>
+                                <td>
+                                    @if($activity->properties->has('attributes') && count($activity->properties['attributes']) > 0)
+                                        @php
+                                            $attributes = $activity->properties['attributes'];
+                                            $old = $activity->properties['old'] ?? [];
+                                            $hasVisibleChanges = false;
+                                        @endphp
+                                        <ul class="list-unstyled mb-0" style="font-size: 0.75rem;">
+                                            @foreach($attributes as $key => $value)
+                                                @if($key !== 'updated_at' && $key !== 'password')
+                                                    @php $hasVisibleChanges = true; @endphp
+                                                    <li>
+                                                        <strong class="text-muted">{{ $key }} :</strong>
+                                                        <span class="text-danger text-decoration-line-through">{{ $old[$key] ?? '—' }}</span>
+                                                        <i class="fas fa-arrow-right text-muted mx-1"></i>
+                                                        <span class="text-success">{{ $value ?? '—' }}</span>
+                                                    </li>
+                                                @endif
+                                            @endforeach
+                                        </ul>
+                                        @if(!$hasVisibleChanges)
+                                            <span class="text-muted" style="font-size: 0.75rem;">Modifications internes</span>
+                                        @endif
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-3">
+                                    Aucune modification enregistrée
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 

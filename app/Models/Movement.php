@@ -29,6 +29,8 @@ class Movement extends Model
         'proxy_name',
         'proxy_cin',
         'proxy_document_path',
+        'reference_number',
+        'withdrawal_type',
     ];
 
     protected $casts = [

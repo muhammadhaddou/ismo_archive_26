@@ -255,6 +255,11 @@
                                 </td>
                                 <td style="font-size:.82rem;">
                                     <div>{{ $mv->observations ?? '—' }}</div>
+                                    @if($mv->reference_number)
+                                        <div class="mt-1">
+                                            <span class="badge bg-secondary-lt text-secondary">Réf: {{ $mv->reference_number }}</span>
+                                        </div>
+                                    @endif
                                     @if($mv->is_proxy)
                                         <div class="mt-1 p-2 rounded bg-warning-lt" style="font-size:.75rem;">
                                             <i class="ti ti-user-shield text-warning me-1"></i>
